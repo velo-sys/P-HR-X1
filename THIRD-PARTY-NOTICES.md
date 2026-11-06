@@ -19,7 +19,11 @@ The Android robot (drawn as a hat on the app icon in the About screen) is reprod
 work created and shared by Google and used according to terms described in the Creative Commons 3.0
 Attribution License.
 
-## Not bundled
+## Preview page
 
-The app draws its interface with the fonts of the device; no font files are shipped. The preview page
-`docs/index.html` contains no third-party code.
+The app itself ships no fonts, it draws with the fonts of the device. So that the browser preview
+`docs/index.html` looks the same as the app, it embeds subsets of the two Android system fonts the app
+draws with, both under the **Apache License 2.0**:
+
+- Roboto – copyright Google, https://github.com/googlefonts/roboto
+- Droid Sans Mono – copyright Google, https://android.googlesource.com/platform/frameworks/base/+/master/data/fonts/
