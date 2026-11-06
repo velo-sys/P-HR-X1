@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>P-HR-X1 · Y2K Music Player for Android handhelds</title>
+<title>P-HR-X1 · Music player for Android handhelds</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#101012;color:#ddd;font:15px/1.5 system-ui,sans-serif;padding:32px 20px 80px}
@@ -239,7 +239,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 </style>
 </head>
 <body>
-<h1>P-HR-X1 · Y2K Player</h1>
+<h1>P-HR-X1</h1>
 <p style="margin:-2px 0 12px;color:#c39bff;font-style:italic">vibecoded with Claude</p>
 <p class="intro">Ein Musikplayer im Stil eines Hi-Fi-Decks der 2000er für 4:3-Android-Handhelds mit Gamepad (entwickelt und getestet auf einem 960×720-Gerät mit Android 12): gebürstetes Alu, leuchtende VFD-Anzeige, eine Pixel-Walze für die Ordner und <b>24 Pixel-Visualizer</b>, die auf die Musik reagieren.
 Jeder Ordner ist automatisch eine Playlist, alles läuft über die Gerätetasten (oder Touch), und jedes Farbschema hat genau zwei Farben, hier <b>Lavendel / Rot</b>.
@@ -276,7 +276,7 @@ Jeder Ordner ist automatisch eine Playlist, alles läuft über die Gerätetasten
         <li><b>Anzeige:</b> Helligkeit, Leuchten, Scanlines, Flackern, Formatanzeige, Bildschirm an</li>
         <li><b>Bewegung:</b> Laufschrift (Inhalt, Stil, Tempo), Walze, Fensterübergang, Startanimation</li>
         <li><b>Formate:</b> Hinweis – MP3, FLAC, WAV, M4A/AAC, OGG, Opus spielen; AIFF, ALAC, DSD, WV, APE, WMA folgen</li>
-        <li><b>System:</b> Sprache (English / Deutsch), Touch, A/B tauschen, Lautstärke-Anzeige, Tasten, Tastentest, Über (neofetch), Reset, Beenden</li></ul>
+        <li><b>System:</b> Sprache (English / Deutsch), Touch, A/B tauschen, Lautstärke-Anzeige, Tasten, Tastentest, Über, Reset, Beenden</li></ul>
     <p style="font-size:12px;color:#777">Hinweis: In der App ist das Setup ein eigenes Vollbild-Fenster mit eigenem Display (Live-Vorschau). Diese Seite zeigt die Einstellungen als ausfahrende Leiste.</p>
     <h3>Ordnerwahl (B)</h3>
     <p>Sieht aus wie <code>ls</code> in der Bash, nur ohne Rechte und Datum, mit Liedzahl und Ordnername. Unten zeigt die Eingabezeile live <code>cd "…"</code>, A spielt den gewählten Ordner ab.</p>
@@ -734,7 +734,7 @@ const CATS = [
     {k:"vosd",l:"Lautstärke-Anzeige",t:"pot"},
     {k:"keys",l:"Tastenbelegung",t:"act",win:"keys"},
     {k:"keytest",l:"Tastentest",t:"act",info:"NUR IN DER APP"},
-    {k:"about",l:"Über (neofetch)",t:"act",win:"about"},
+    {k:"about",l:"Über",t:"act",win:"about"},
     {k:"reset",l:"Werkseinstellungen",t:"act",win:"reset"},
     {k:"quit",l:"Beenden",s:"Musik stoppen",t:"act",info:"NUR IN DER APP"}]},
 ];
@@ -956,7 +956,7 @@ function createPlayer(host) {
     q(".wt").textContent = "[ " + T[name] + " ]";
     let body = "", foot = "B = ZURÜCK";
     if (name === "keys") body = "A ....... PLAY / PAUSE\nB ....... ORDNER (BASH)\nSTART ... OPTIONEN\nSELECT .. VISUALIZER VOLLBILD\n▲▼ ...... WALZE / ORDNER\n◀▶ ...... LIED · HALTEN=SPULEN\nX / Y ... ZUFALL / WIEDERH.\nVOL ± ... LAUTSTÄRKE";
-    if (name === "about") body = "P-HR-X1\nY2K PLAYER 0.5\nVIBECODED WITH CLAUDE\n\nOFFLINE · KEINE WERBUNG\nKEIN TRACKING · KEIN KONTO\n\n" + N + " ORDNER · " + TOTAL + " LIEDER";
+    if (name === "about") body = "P-HR-X1 0.5\nVIBECODED WITH CLAUDE\n\nOFFLINE · KEINE WERBUNG\nKEIN TRACKING · KEIN KONTO\n\n" + N + " ORDNER · " + TOTAL + " LIEDER";
     if (name === "reset") { body = "ALLE OPTIONEN AUF\nWERKSEINSTELLUNG SETZEN?\n\nDEINE MUSIK BLEIBT\nUNBERÜHRT."; foot = "A = JA · B = NEIN"; }
     if (name === "empty") { body = "IN /Music WURDEN KEINE\nORDNER MIT LIEDERN GEFUNDEN.\n\nMUSIK PER USB ODER\nSD-KARTE NACH /Music\nKOPIEREN."; foot = "A = NEU SUCHEN · B = ZURÜCK"; }
     q(".wb").innerHTML = body; q(".wf").textContent = foot;
@@ -995,14 +995,14 @@ function createPlayer(host) {
     } else {
       box.style.display = "none"; cv.style.display = "";
       const p = new Pix(cv), vc = hex2rgb(COLORS[o.color][1]);
-      const w1 = textW("P-HR-X1", 3), w2 = textW("Y2K PLAYER", 2), w3 = textW("HIGH RESOLUTION AUDIO");
+      const w1 = textW("P-HR-X1", 3), w2 = textW("MUSIC PLAYER", 2), w3 = textW("HIGH RESOLUTION AUDIO");
       const pts = []; for (let y = 0; y < p.H; y++) for (let x = 0; x < p.W; x++) pts.push(Math.random());
       let t0 = performance.now();
       saverAnim = setInterval(() => {
         const t = (performance.now() - t0)/1600; p.clear([0,0,0]);
         const m = (X, Y) => pts[Y*p.W + X] < t;
         p.text("P-HR-X1", (p.W - w1) >> 1, 26, 3, vc, 1, m);
-        p.text("Y2K PLAYER", (p.W - w2) >> 1, 58, 2, vc, .9, m);
+        p.text("MUSIC PLAYER", (p.W - w2) >> 1, 58, 2, vc, .9, m);
         if (t > 1.1) p.text("HIGH RESOLUTION AUDIO", (p.W - w3) >> 1, 84, 1, vc, Math.min(1, (t-1.1)*3));
         p.flush();
         if (t > 2.2) { if (hold) t0 = performance.now(); else { clearInterval(saverAnim); end(); } }

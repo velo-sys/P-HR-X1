@@ -1,4 +1,6 @@
-# P-HR-X1 · Y2K Music Player
+# P-HR-X1
+
+Music player in 2000s hi-fi style for Android gamepad handhelds.
 
 *vibecoded with Claude* · [Download the APK](https://github.com/velo-sys/P-HR-X1/releases/latest)
 
@@ -77,6 +79,9 @@ Install with `adb install -r P-HR-X1.apk` or copy the APK to the device.
 | `Opts.kt` · `SysInfo.kt` · `Icons.kt` | Options/menus/colors (EN + DE), neofetch data, pixel icons |
 
 ## Disclaimer
+
+The Android robot (used as a hat on the app icon in the About screen) is reproduced or modified from work created and shared by Google and used according to terms described in the Creative Commons 3.0 Attribution License.
+
 
 P-HR-X1 is an independent hobby project by velo-sys, vibecoded with Claude. It is not affiliated with, endorsed by or sponsored by any device manufacturer or any audio certification body. The on-screen print uses the project's own name; "Hi-Fi" and "HI-RES" are used only as generic descriptions, not as logos. All other product names and trademarks belong to their respective owners and are mentioned only to describe compatibility.
 

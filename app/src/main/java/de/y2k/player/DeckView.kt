@@ -542,7 +542,10 @@ class DeckView(ctx: Context) : View(ctx), Choreographer.FrameCallback {
         vfdBox(c, 8f, 8f, 432f, 322f)
         c.save(); c.clipRect(10f, 10f, 430f, 320f)
         val fs = 14f; val lh = 18.5f
-        SysInfo.LOGO.forEachIndexed { i, l -> text(c, l, 14f, 46f + i * lh, fs, v2) }
+        // App-Icon mit Android-Hut (feste Logo-Farben)
+        val lp = 5.6f; val lx = 20f; val ly = 40f
+        SysInfo.LOGO.forEachIndexed { r0, row -> row.forEachIndexed { c0, ch -> SysInfo.LOGO_COLORS[ch]?.let { col ->
+            fp.shader = null; fp.color = Col.argb(col); c.drawRect(lx + c0 * lp, ly + r0 * lp, lx + (c0 + 1) * lp, ly + (r0 + 1) * lp, fp) } } }
         var y = 30f
         neo.forEach { (k, v) ->
             if (k.isEmpty()) text(c, v, 168f, y, fs, if (v.startsWith("-")) vc else v2)

@@ -118,7 +118,7 @@ object Menu {
                 Item("vosd", "Lautstärke-Anzeige", "Volume display", T.POT),
                 Item("keys", "Tastenbelegung", "Button map", T.ACT, action = "keys"),
                 Item("keytest", "Tastentest", "Button test", T.ACT, action = "keytest"),
-                Item("about", "Über (neofetch)", "About (neofetch)", T.ACT, action = "about"),
+                Item("about", "Über", "About", T.ACT, action = "about"),
                 Item("reset", "Werkseinstellungen", "Factory reset", T.ACT, action = "reset"),
                 Item("quit", "Beenden", "Quit", T.ACT, "Musik stoppen", "stop music", action = "quit"))),
         )

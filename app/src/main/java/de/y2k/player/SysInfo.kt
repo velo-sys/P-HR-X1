@@ -15,20 +15,23 @@ import java.io.File
 
 /** Systemdaten im neofetch-Stil für das "Über"-Fenster. */
 object SysInfo {
+    /** App-Icon als Pixel-Logo mit Android-Hut (g = Android-Grün, e = Augen). Feste Farben, gehört zum Logo. */
     val LOGO = listOf(
-        " .-----------. ",
-        " |  Y2K   >> | ",
-        " |===========| ",
-        " | (@)   (@) | ",
-        " |  P-HR-X1  | ",
-        " '-----------' ",
-        "   ||     ||   ",
-    )
+        "......g...........g.....", ".......g.........g......", ".........gggggggg.......", ".......gggggggggggg.....",
+        "......gggggggggggggg....", ".....gggeggggggggeggg...", ".....gggggggggggggggg...", "....gggggggggggggggggg..",
+        "SSSSSSSSSSSSSSSSSSSSSSSS", "SDDDDDDDDDDDDDDDDDDDDDDS", "SDDDDDDDDDDDDDDDDDDDDDDS", "SDLLLDDDDDDDDDDDDDDDRRDS",
+        "SDDDDDDDLLLDDDDDDDDDRRDS", "SDLLLDDDLLLDDLLLDDDDRRDS", "SDDDDDDDLLLDDLLLDLLDRRDS", "SDLLLDDDLLLDDLLLDLLDRRDS",
+        "SDDDDDDDDDDDDDDDDDDDDDDS", "SSSSSSSSSSSSSSSSSSSSSSSS", "SSRRRSSKKKKKKKKKKKKKSSSS", "SRRRSSSKKKKKKKKKSSSSSSSS",
+        "SSSSSSSSSSSSSSSSSSSSSSSS")
+    val LOGO_COLORS = mapOf('g' to 0x3DDC84, 'e' to 0xFFFFFF, 'S' to 0xD9DFE6, 'D' to 0x05080A, 'L' to 0xC39BFF, 'R' to 0xFF4433, 'K' to 0x15181B)
 
     /** Liste aus (Bezeichnung, Wert); Bezeichnung leer = Überschrift */
     fun lines(ctx: Context): List<Pair<String, String>> {
         val out = ArrayList<Pair<String, String>>()
-        out += "" to "p-hr-x1@deck"
+        // echter Gerätename aus den Android-Einstellungen, sonst Modell
+        val host = (android.provider.Settings.Global.getString(ctx.contentResolver, "device_name") ?: Build.MODEL)
+            .lowercase().replace(Regex("[^a-z0-9]+"), "-").trim('-').ifEmpty { "android" }
+        out += "" to "p-hr-x1@$host"
         out += "" to "-------------------"
         out += "OS" to "Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})"
         out += L("Gerät", "Device") to "${Build.MANUFACTURER.replaceFirstChar { it.uppercase() }} ${Build.MODEL}".replace("_", " ")
@@ -56,7 +59,7 @@ object SysInfo {
         val au = ctx.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         val sr = au.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE)?.toIntOrNull()
         out += "Audio" to "${if (sr != null) "${sr / 1000} kHz" else "?"} · Vol ${au.getStreamVolume(AudioManager.STREAM_MUSIC)}/${au.getStreamMaxVolume(AudioManager.STREAM_MUSIC)}"
-        out += "Player" to "Y2K Player ${appVersion(ctx)}"
+        out += "Player" to "P-HR-X1 ${appVersion(ctx)}"
         out += "Code" to "vibecoded with Claude"
         out += L("Musik", "Music") to "${Engine.folders.size} " + L("Ordner", "folders") + " · ${Engine.folders.sumOf { it.tracks.size }} " + L("Lieder", "tracks")
         out += L("Schema", "Scheme") to Palette.SCHEMES.getOrNull(Engine.opts["scheme"]).let { if (it == null || it.size < 4) "${Palette.COLORS[Engine.opts["color"]].name} / ${Palette.COLORS.getOrNull(Engine.opts["col2"])?.name ?: "–"}" else L(it[0], it[1]) }
