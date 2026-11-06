@@ -234,9 +234,7 @@ class Skyline : Vis() {
 
 /** Nachtfahrt: Auto fährt in den Sonnenuntergang, Tempo = Energie der Musik, Sternschnuppen */
 private val CAR = listOf(
-    "........############........", ".......#wwwwwwwwwwww#.......", "......#wwwwwwwwwwwwww#......", ".....##################.....",
-    "...######################...", "..########################..", ".#LLLLLL############LLLLLL#.", ".##########PPPPPP##########.",
-    ".##########################.", "..TTTT................TTTT..", "..TTTT................TTTT..")
+    "...........################...........", "..........#wwwwwwwwwwwwwwww#..........", ".........#wwwwwwwwwwwwwwwwww#.........", "........#wwwwwwwwwwwwwwwwwwww#........", ".......########################.......", "....##############################....", "..##################################..", ".####################################.", "#LLLLLLLLL##################LLLLLLLLL#", "#LLLLLLLLL##################LLLLLLLLL#", "#############PPPPPPPPPPPP#############", "######################################", ".####################################.", "..TTTTTT......................TTTTTT..", "..TTTTTT......................TTTTTT..")
 private val CAR_S = listOf("...######...", "..#wwwwww#..", ".##########.", "#LL######LL#", ".TT......TT.")
 class NightDrive : Vis() {
     private class Sh(var x: Float, var y: Float, val vx: Float, val vy: Float, var l: Float)

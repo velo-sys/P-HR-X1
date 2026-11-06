@@ -32,7 +32,7 @@ class DeckView(ctx: Context) : View(ctx), Choreographer.FrameCallback {
     // feste Aufdruck-Farben (gehören zum Gehäuse, nicht zum Farbschema)
     private val PRINT_RED = 0xE0302A
     // Aufdruck – bewusst keine fremden Marken (kein Herstellername, kein Hi-Res-AUDIO-Logo)
-    private val BRAND = "VELO-SYS"; private val BADGE = "Hi-Fi"
+    private val BRAND = "P-HR-X1"; private val BADGE = "Hi-Fi"
 
     // ---------- Zustand ----------
     private var mode = "boot"          // player | term | opt | win | viz | boot
@@ -227,12 +227,11 @@ class DeckView(ctx: Context) : View(ctx), Choreographer.FrameCallback {
     }
 
     private fun drawPlayer(c: Canvas, now: Long) {
-        // Aufdruck (folgt dem Farbschema: Akzente in der Zweitfarbe)
+        // Aufdruck: App-Name mit festem rotem Block dahinter
         text(c, BRAND, 12f, 17f, 15f, 0x15181B, sansBI, glow = false)
         val kw = tw(BRAND, 15f, sansBI)
         path.reset(); path.moveTo(12 + kw + 7, 18f); path.lineTo(12 + kw + 11, 5f); path.lineTo(12 + kw + 18, 5f); path.lineTo(12 + kw + 14, 18f); path.close()
         fp.shader = null; fp.color = Col.argb(PRINT_RED); c.drawPath(path, fp)
-        text(c, "P-HR-X1", 12 + kw + 22, 17f, 15f, 0x15181B, sansBI, glow = false)
         val dw = tw("Digital Audio", 10f, sansBI); val hw = tw(BADGE, 10f, sansBI)
         fp.shader = LinearGradient(0f, 6f, 0f, 17f, intArrayOf(0xFFF3D27A.toInt(), 0xFFD4A62A.toInt(), 0xFFB8861B.toInt()), null, Shader.TileMode.CLAMP)
         c.drawRect(428 - dw - hw - 16, 6f, 428 - dw - 4, 17f, fp); fp.shader = null
@@ -600,7 +599,7 @@ class DeckView(ctx: Context) : View(ctx), Choreographer.FrameCallback {
         val t = now - bootStart
         fp.color = 0xFF000000.toInt(); c.drawRect(0f, 0f, LW, LH, fp)
         vfdBox(c, 10f, 10f, 430f, 320f)
-        val l1 = "$BRAND P-HR-X1"
+        val l1 = BRAND
         when {
             t < 700 -> { text(c, "88:88 8888", 220f, 150f, 40f, vc, align = Paint.Align.CENTER); text(c, "████████████████", 220f, 180f, 16f, vc, align = Paint.Align.CENTER)
                 text(c, "MP3 FLAC WAV DSD HI-RES RDM RPT SLP", 220f, 205f, 13f, v2, align = Paint.Align.CENTER) }

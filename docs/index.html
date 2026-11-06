@@ -653,8 +653,7 @@ const VIZ = [
       p.px(cx - hw, y, c.v2, .5 + .5*tt); p.px(cx + hw, y, c.v2, .5 + .5*tt);
       const zz = 1/(tt + .02); if ((Math.floor(zz*.9 - c.st.off*6) & 1) === 0) { p.px(cx, y, c.lvc, .4 + .6*tt); if (!sm && tt > .4) p.px(cx + 1, y, c.lvc, .4 + .6*tt); } }
     const spr = sm ? ["...######...","..#wwwwww#..",".##########.","#LL######LL#",".TT......TT."]
-      : ["........############........",".......#wwwwwwwwwwww#.......","......#wwwwwwwwwwwwww#......",".....##################.....","...######################...","..########################..",
-         ".#LLLLLL############LLLLLL#.",".##########PPPPPP##########.",".##########################.","..TTTT................TTTT..","..TTTT................TTTT.."];
+      : ["...........################...........","..........#wwwwwwwwwwwwwwww#..........",".........#wwwwwwwwwwwwwwwwww#.........","........#wwwwwwwwwwwwwwwwwwww#........",".......########################.......","....##############################....","..##################################..",".####################################.","#LLLLLLLLL##################LLLLLLLLL#","#LLLLLLLLL##################LLLLLLLLL#","#############PPPPPPPPPPPP#############","######################################",".####################################.","..TTTTTT......................TTTTTT..","..TTTTTT......................TTTTTT.."];
     const bounce = Math.round(A.kick*(sm ? 1 : 2)), sx = Math.round(cx - spr[0].length/2 + Math.sin(t*.7)*(sm ? 1 : 3)*bandAt(A, .4)), sy = H - spr.length - (sm ? 0 : 3) - bounce;
     spr.forEach((row, r) => [...row].forEach((ch, k) => {
       if (ch === "#") p.px(sx + k, sy + r, mixc(c.vc, c.bg, .35), 1); else if (ch === "w") p.px(sx + k, sy + r, mixc(c.bg, c.vc, .2), 1);
@@ -817,7 +816,7 @@ class PixelDrum extends Pix {
 const SCREEN_HTML = `
 <div class="screen alu">
   <div class="layer pg-player alu">
-    <div class="head"><span class="h-l">VELO-SYS<i class="slash"></i>P-HR-X1</span><span class="h-r"><i class="box">Hi-Fi</i>Digital Audio</span></div>
+    <div class="head"><span class="h-l">P-HR-X1<i class="slash"></i></span><span class="h-r"><i class="box">Hi-Fi</i>Digital Audio</span></div>
     <div class="vfd main">
       <div class="ind"><span class="fmtgrp fmt js-fmt">MP3</span><span class="fmtgrp js-q1"></span><span class="fmtgrp js-q2"></span><span class="fmtgrp flag js-hires">HI-RES</span>
         <span class="sp"></span><span class="flag ico js-shuf"></span><span class="flag ico js-rep"></span><span class="flag ico js-sleep"></span></div>
@@ -956,7 +955,7 @@ function createPlayer(host) {
     q(".wt").textContent = "[ " + T[name] + " ]";
     let body = "", foot = "B = ZURÜCK";
     if (name === "keys") body = "A ....... PLAY / PAUSE\nB ....... ORDNER (BASH)\nSTART ... OPTIONEN\nSELECT .. VISUALIZER VOLLBILD\n▲▼ ...... WALZE / ORDNER\n◀▶ ...... LIED · HALTEN=SPULEN\nX / Y ... ZUFALL / WIEDERH.\nVOL ± ... LAUTSTÄRKE";
-    if (name === "about") body = "VELO-SYS P-HR-X1\nY2K PLAYER 0.4\n\nOFFLINE · KEINE WERBUNG\nKEIN TRACKING · KEIN KONTO\n\n" + N + " ORDNER · " + TOTAL + " LIEDER";
+    if (name === "about") body = "P-HR-X1\nY2K PLAYER 0.4\n\nOFFLINE · KEINE WERBUNG\nKEIN TRACKING · KEIN KONTO\n\n" + N + " ORDNER · " + TOTAL + " LIEDER";
     if (name === "reset") { body = "ALLE OPTIONEN AUF\nWERKSEINSTELLUNG SETZEN?\n\nDEINE MUSIK BLEIBT\nUNBERÜHRT."; foot = "A = JA · B = NEIN"; }
     if (name === "empty") { body = "IN /Music WURDEN KEINE\nORDNER MIT LIEDERN GEFUNDEN.\n\nMUSIK PER USB ODER\nSD-KARTE NACH /Music\nKOPIEREN."; foot = "A = NEU SUCHEN · B = ZURÜCK"; }
     q(".wb").innerHTML = body; q(".wf").textContent = foot;
@@ -982,7 +981,7 @@ function createPlayer(host) {
     const end = () => { if (!hold) { st.mode = "player"; render(); } };
     if (type === 0) {
       cv.style.display = "none"; box.style.display = "";
-      const l1 = "VELO-SYS P-HR-X1";
+      const l1 = "P-HR-X1";
       const seq = () => {
         box.innerHTML = `<div class="b1">88:88 8888</div><div class="b2">████████████████</div><div class="b3">MP3 FLAC M4A WAV HI-RES RDM RPT SLP</div>`;
         at(700, () => box.innerHTML = "");
@@ -995,14 +994,14 @@ function createPlayer(host) {
     } else {
       box.style.display = "none"; cv.style.display = "";
       const p = new Pix(cv), vc = hex2rgb(COLORS[o.color][1]);
-      const w1 = textW("VELO-SYS", 2), w2 = textW("P-HR-X1", 2), w3 = textW("HIGH RESOLUTION AUDIO");
+      const w1 = textW("P-HR-X1", 3), w2 = textW("Y2K PLAYER", 2), w3 = textW("HIGH RESOLUTION AUDIO");
       const pts = []; for (let y = 0; y < p.H; y++) for (let x = 0; x < p.W; x++) pts.push(Math.random());
       let t0 = performance.now();
       saverAnim = setInterval(() => {
         const t = (performance.now() - t0)/1600; p.clear([0,0,0]);
         const m = (X, Y) => pts[Y*p.W + X] < t;
-        p.text("VELO-SYS", (p.W - w1) >> 1, 30, 2, vc, 1, m);
-        p.text("P-HR-X1", (p.W - w2) >> 1, 58, 2, vc, .9, m);
+        p.text("P-HR-X1", (p.W - w1) >> 1, 26, 3, vc, 1, m);
+        p.text("Y2K PLAYER", (p.W - w2) >> 1, 58, 2, vc, .9, m);
         if (t > 1.1) p.text("HIGH RESOLUTION AUDIO", (p.W - w3) >> 1, 84, 1, vc, Math.min(1, (t-1.1)*3));
         p.flush();
         if (t > 2.2) { if (hold) t0 = performance.now(); else { clearInterval(saverAnim); end(); } }

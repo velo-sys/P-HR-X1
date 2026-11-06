@@ -10,8 +10,8 @@ android {
         applicationId = "de.y2k.player"
         minSdk = 26
         targetSdk = 35
-        versionCode = 4
-        versionName = "0.4"
+        versionCode = 5
+        versionName = "0.5"
     }
     // Signatur: Zugangsdaten aus keystore.properties (nicht im Repo). Fehlt sie, wird mit dem Debug-Schlüssel signiert.
     val ksFile = rootProject.file("keystore.properties")

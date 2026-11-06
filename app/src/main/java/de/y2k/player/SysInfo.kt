@@ -17,7 +17,7 @@ import java.io.File
 object SysInfo {
     val LOGO = listOf(
         " .-----------. ",
-        " | VELO-SYS >| ",
+        " |  Y2K   >> | ",
         " |===========| ",
         " | (@)   (@) | ",
         " |  P-HR-X1  | ",
@@ -28,7 +28,7 @@ object SysInfo {
     /** Liste aus (Bezeichnung, Wert); Bezeichnung leer = Überschrift */
     fun lines(ctx: Context): List<Pair<String, String>> {
         val out = ArrayList<Pair<String, String>>()
-        out += "" to "p-hr-x1@velo-sys"
+        out += "" to "p-hr-x1@deck"
         out += "" to "-------------------"
         out += "OS" to "Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})"
         out += L("Gerät", "Device") to "${Build.MANUFACTURER.replaceFirstChar { it.uppercase() }} ${Build.MODEL}".replace("_", " ")
