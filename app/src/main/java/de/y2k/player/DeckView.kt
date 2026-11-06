@@ -80,7 +80,7 @@ class DeckView(ctx: Context) : View(ctx), Choreographer.FrameCallback {
     private val aluBmp: Bitmap = makeAlu()
     private val dotPaint = Paint().apply { shader = BitmapShader(makeDots(), Shader.TileMode.REPEAT, Shader.TileMode.REPEAT); isFilterBitmap = false }
     private val scanPaint = Paint().apply { shader = BitmapShader(makeScan(), Shader.TileMode.REPEAT, Shader.TileMode.REPEAT); isFilterBitmap = false }
-    private val r = RectF(); private val path = Path()
+    private val r = RectF(); private val path = Path(); private val dotMatrix = android.graphics.Matrix()
 
     init {
         isFocusable = true
@@ -283,6 +283,10 @@ class DeckView(ctx: Context) : View(ctx), Choreographer.FrameCallback {
         drum.draw(Engine.folders, vc, v2)
         vfdBox(c, 10f, 220f, 430f, 322f)
         r.set(10f, 220f, 430f, 322f); c.drawBitmap(drum.pix.bmp, null, r, bp)
+        // gleiches VFD-Punktraster wie oben, exakt auf die Walzen-Pixel (3 logische px) ausgerichtet
+        dotMatrix.setTranslate(10f, 220f); dotPaint.shader.setLocalMatrix(dotMatrix); dotPaint.alpha = 255
+        c.drawRect(10f, 220f, 430f, 322f, dotPaint)
+        dotMatrix.reset(); dotPaint.shader.setLocalMatrix(dotMatrix)
         fp.shader = LinearGradient(10f, 220f, 160f, 400f, intArrayOf(0, 0x1EFFFFFF, 0, 0, 0x12FFFFFF, 0), floatArrayOf(.28f, .36f, .44f, .68f, .72f, .76f), Shader.TileMode.CLAMP)
         c.drawRect(10f, 220f, 430f, 322f, fp); fp.shader = null
         if (o["scanl"] == 1) c.drawRect(10f, 220f, 430f, 322f, scanPaint)

@@ -275,7 +275,6 @@ Jeder Ordner ist automatisch eine Playlist, alles läuft über die Gerätetasten
         <li><b>Farben:</b> Farbschema, Haupt- und Zweitfarbe (25 + Regenbogen), Zweifarbig-Stil, Spitzenfarbe</li>
         <li><b>Anzeige:</b> Helligkeit, Leuchten, Scanlines, Flackern, Formatanzeige, Bildschirm an</li>
         <li><b>Bewegung:</b> Laufschrift (Inhalt, Stil, Tempo), Walze, Fensterübergang, Startanimation</li>
-        <li><b>Formate:</b> Hinweis – MP3, FLAC, WAV, M4A/AAC, OGG, Opus spielen; AIFF, ALAC, DSD, WV, APE, WMA folgen</li>
         <li><b>System:</b> Sprache (English / Deutsch), Touch, A/B tauschen, Lautstärke-Anzeige, Tasten, Tastentest, Über, Reset, Beenden</li></ul>
     <p style="font-size:12px;color:#777">Hinweis: In der App ist das Setup ein eigenes Vollbild-Fenster mit eigenem Display (Live-Vorschau). Diese Seite zeigt die Einstellungen als ausfahrende Leiste.</p>
     <h3>Ordnerwahl (B)</h3>
@@ -722,11 +721,6 @@ const CATS = [
     {k:"trans",l:"Fensterübergang",t:"roll",v:["Schieben","Blende","Scanline"]},
     {k:"boot",l:"Startanimation",t:"roll",v:["VFD-Test","Aus"]},
     {k:"bootnow",l:"Startanimation zeigen",t:"act",run:"boot"}]},
-  {name:"Formate", ico:"◆", items:[
-    {k:"fi1",l:"Es werden immer alle Dateien gefunden",s:"spielbare Formate:",t:"info"},
-    {k:"fi2",l:"MP3 · FLAC · WAV",s:"klassisch / verlustfrei",t:"info"},
-    {k:"fi3",l:"M4A / AAC · OGG · Opus",s:"komprimiert",t:"info"},
-    {k:"fi4",l:"AIFF · ALAC · DSD · WV · APE · WMA",s:"folgt (Decoder)",t:"info"}]},
   {name:"System", ico:"⚙", items:[
     {k:"lang",l:"Sprache / Language",t:"roll",v:["English","Deutsch"]},
     {k:"touch",l:"Touch-Bedienung",s:"Tippen & Wischen",t:"pot"},

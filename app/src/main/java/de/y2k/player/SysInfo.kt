@@ -17,13 +17,12 @@ import java.io.File
 object SysInfo {
     /** App-Icon als Pixel-Logo mit Android-Hut (g = Android-Grün, e = Augen). Feste Farben, gehört zum Logo. */
     val LOGO = listOf(
-        "......g...........g.....", ".......g.........g......", ".........gggggggg.......", ".......gggggggggggg.....",
-        "......gggggggggggggg....", ".....gggeggggggggeggg...", ".....gggggggggggggggg...", "....gggggggggggggggggg..",
-        "SSSSSSSSSSSSSSSSSSSSSSSS", "SDDDDDDDDDDDDDDDDDDDDDDS", "SDDDDDDDDDDDDDDDDDDDDDDS", "SDLLLDDDDDDDDDDDDDDDRRDS",
-        "SDDDDDDDLLLDDDDDDDDDRRDS", "SDLLLDDDLLLDDLLLDDDDRRDS", "SDDDDDDDLLLDDLLLDLLDRRDS", "SDLLLDDDLLLDDLLLDLLDRRDS",
-        "SDDDDDDDDDDDDDDDDDDDDDDS", "SSSSSSSSSSSSSSSSSSSSSSSS", "SSRRRSSKKKKKKKKKKKKKSSSS", "SRRRSSSKKKKKKKKKSSSSSSSS",
-        "SSSSSSSSSSSSSSSSSSSSSSSS")
-    val LOGO_COLORS = mapOf('g' to 0x3DDC84, 'e' to 0xFFFFFF, 'S' to 0xD9DFE6, 'D' to 0x05080A, 'L' to 0xC39BFF, 'R' to 0xFF4433, 'K' to 0x15181B)
+        ".....g..........g.....", "......g........g......", ".......gggggggg.......", ".....gg........gg.....",
+        "....g...g....g...g....", "....gggggggggggggg....", "......................", ".SSSSSSSSSSSSSSSSSSSS.",
+        ".S..................S.", ".S.L...L...L...L..R.S.", ".S.L...L...L...L..R.S.", ".S.....L...L...L..R.S.",
+        ".S.........L...L..R.S.", ".S.............L..R.S.", ".S..................S.", ".SSSSSSSSSSSSSSSSSSSS.",
+        "......................", "...RR..KKKKKKKKKK.....", "..RR..................")
+    val LOGO_COLORS = mapOf('g' to 0x3DDC84, 'S' to 0xD9DFE6, 'D' to 0x05080A, 'L' to 0xC39BFF, 'R' to 0xFF4433, 'K' to 0x15181B)
 
     /** Liste aus (Bezeichnung, Wert); Bezeichnung leer = Überschrift */
     fun lines(ctx: Context): List<Pair<String, String>> {

@@ -106,11 +106,6 @@ object Menu {
                 Item("trans", "Fensterübergang", "Window transition", T.ROLL, valDe = listOf("Schieben", "Blende", "Scanline"), valEn = listOf("Slide", "Fade", "Scanline")),
                 Item("boot", "Startanimation", "Boot animation", T.ROLL, valDe = listOf("VFD-Test", "Aus"), valEn = listOf("VFD test", "Off")),
                 Item("bootnow", "Startanimation zeigen", "Show boot animation", T.ACT, action = "boot"))),
-            Cat("Formate", "Formats", "◆", listOf(
-                Item("fi1", "Es werden immer alle Dateien gefunden", "All files are always found", T.INFO, "spielbare Formate:", "playable formats:"),
-                Item("fi2", "MP3 · FLAC · WAV", "MP3 · FLAC · WAV", T.INFO, "klassisch / verlustfrei", "classic / lossless"),
-                Item("fi3", "M4A / AAC · OGG · Opus", "M4A / AAC · OGG · Opus", T.INFO, "komprimiert", "compressed"),
-                Item("fi4", "AIFF · ALAC · DSD · WV · APE · WMA", "AIFF · ALAC · DSD · WV · APE · WMA", T.INFO, "folgt (Decoder) – bis dahin übersprungen", "coming (decoder) – skipped for now"))),
             Cat("System", "System", "⚙", listOf(
                 Item("lang", "Sprache / Language", "Language / Sprache", T.ROLL, valDe = listOf("English", "Deutsch")),
                 Item("touch", "Touch-Bedienung", "Touch control", T.POT, "Tippen & Wischen", "tap & swipe"),

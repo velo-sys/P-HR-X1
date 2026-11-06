@@ -35,7 +35,9 @@ class Drum {
         }
     }
 
+    private var lastVc = -1; private var lastV2 = -1; private var lastN = -1
     fun draw(folders: List<Folder>, vc: Int, v2: Int) {
+        if (vc != lastVc || v2 != lastV2 || folders.size != lastN) { lastVc = vc; lastV2 = v2; lastN = folders.size; dirty = true }   // Farbschema-Wechsel
         if (!dirty) return; dirty = false
         val n = folders.size
         pix.clear(Col.scale(vc, .03f))
