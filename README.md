@@ -4,9 +4,24 @@ Music player in 2000s hi-fi style for Android gamepad handhelds.
 
 *vibecoded with Claude* · [Download the APK](https://github.com/velo-sys/P-HR-X1/releases/latest)
 
-| Boot | Setup | Visualizer preview | Night Drive |
-|---|---|---|---|
-| ![Boot](docs/screenshots/boot.png) | ![Setup](docs/screenshots/setup.png) | ![Visualizer](docs/screenshots/setup-visualizer.png) | ![Night Drive](docs/screenshots/night-drive.png) |
+## Screens
+
+| Main screen | Folder list (B) |
+|---|---|
+| ![Main screen](docs/screenshots/main.png) | ![Folder list](docs/screenshots/folders.png) |
+| VFD display, small visualizer and the folder drum | Bash-style list: track count and folder name |
+
+| Setup (START) | Visualizer setup |
+|---|---|
+| ![Setup](docs/screenshots/setup.png) | ![Visualizer setup](docs/screenshots/setup-visualizer.png) |
+| Seven categories, the display shows the selection | Live preview of the small and the full-screen visualizer |
+
+| Full-screen visualizer (SELECT) | Boot animation |
+|---|---|
+| ![Night Drive](docs/screenshots/night-drive.png) | ![Boot](docs/screenshots/boot.png) |
+| Night Drive, one of 24 visualizers | VFD test on start |
+
+All screenshots: color scheme Lavender / Red, brightness 100 %.
 
 **Interactive preview:** open [`docs/index.html`](docs/index.html) in a browser.
 
@@ -35,6 +50,18 @@ Music player in 2000s hi-fi style for Android gamepad handhelds.
 | L / R | Switch visualizer |
 | X / Y | Shuffle / repeat |
 | VOL ± | Volume |
+
+## Setup menu
+
+| Category | Options |
+|---|---|
+| Playback | Shuffle · Repeat · At folder end · Sleep timer · Fade in/out · Gapless · Autoplay on start · Pause on unplug |
+| Library | Music folder · Add folder · Subfolders separate · Track order · Hidden folders · Rescan |
+| Visualizer | Visualizer · Smoothing · Follows volume · Info line (full screen) · Show full screen |
+| Colors | Color scheme · Main color · Second color · Two-tone style · Peak color |
+| Display | Brightness · Glow · Scanlines · Flicker · Format display · Keep screen on |
+| Motion | Marquee shows · Marquee style · Marquee speed · Drum · Window transition · Boot animation · Show boot animation |
+| System | Language · Touch control · Swap A/B · Volume display · Button map · Button test · About · Factory reset · Quit |
 
 ## Requirements
 
