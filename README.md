@@ -1,8 +1,24 @@
 # P-HR-X1
 
-Music player in 2000s hi-fi style for Android gamepad handhelds.
+<div align="center">
 
-*vibecoded with Claude* · [Download the APK](https://github.com/velo-sys/P-HR-X1/releases/latest)
+## 🤖 Vibecoded with Claude Code
+
+[![Built with Claude Code](https://img.shields.io/badge/built%20with-Claude%20Code-D97757?style=for-the-badge)](https://claude.com/claude-code)
+
+**This entire app was written by [Claude Code](https://claude.com/claude-code)** — the Kotlin, the canvas
+interface, the FFT analyzer, all 24 pixel visualizers and the interactive preview page — round by round,
+from HTML design proposals to the signed APK.
+
+</div>
+
+---
+
+A music player in 2000s hi-fi style for Android gamepad handhelds – **fully offline**, no account, no
+server, no `INTERNET` permission in the manifest. Every folder with music becomes a playlist, and the
+whole app is controlled with the D-pad and face buttons.
+
+[Download the APK](https://github.com/velo-sys/P-HR-X1/releases/latest) · [Interactive preview](docs/index.html)
 
 ## Screens
 
@@ -23,19 +39,31 @@ Music player in 2000s hi-fi style for Android gamepad handhelds.
 
 All screenshots: color scheme Lavender / Red, brightness 100 %.
 
-**Interactive preview:** open [`docs/index.html`](docs/index.html) in a browser.
-
 ## Features
 
-- **Folders are playlists** on a pixel-art drum (▲▼); add any folder through a bash-style browser
-- **Bash-style folder list** (B)
-- **VFD display** with format, bit depth, sample rate or bitrate and pixel status icons
-- **24 visualizers** driven by the real audio signal, small and full screen in sync (L / R, SELECT), intensity follows the volume
-- **Two-color schemes**: main and second color in shades, 25 colors, rainbow mode, presets, swap on beat
-- **Setup window** with its own display and live previews
+**24 visualizers**, driven by the real audio signal, small and full screen in sync:
+
+| Group | Visualizers |
+|---|---|
+| Classic | Bars · Mirror · Dot Matrix · Oscilloscope · Waterfall · VU Needles · LED Meter |
+| Retro | Pixel Flames · Warp · Synth-Skyline · Night Drive · Lissajous |
+| Abstract | Dolphins · Plasma · Tunnel · Galaxy · Lava Lamp · Orbit · Cells · Kaleidoscope · DNA Helix · Pixel Rain · Polyhedron · Jellyfish |
+
+They read the PCM stream straight from the player (no microphone permission), react to the beat and get
+more intense with the volume, at full power from 50 %.
+
+**On top of that:**
+
+- **Folders are playlists** on a pixel-art drum (▲▼); any folder can be added through a bash-style browser
+- **Bash-style folder list** (B): `ls` with track count and folder name, `cd "…"` to play
+- **VFD display** with format, bit depth, sample rate or bitrate and pixel status icons for play, pause,
+  seek, shuffle, repeat and sleep
+- **Two-color schemes**: a main and a second color in lighter and darker shades, 25 colors, rainbow mode,
+  presets such as Lavender / Red, optional swap on the beat
+- **Setup window** with its own display and live previews; on/off options are knobs, everything else rollers
 - **Formats**: MP3, FLAC, WAV, M4A/AAC, OGG and Opus; all audio files are always found
-- English and German, touch control, background playback, sleep timer, fade in/out, about screen with device info
-- No internet permission, no ads, no tracking, about 1.2 MB
+- English and German, touch control, background playback with notification and headset buttons,
+  sleep timer, fade in/out, resume position, about screen with device info
 
 ## Controls
 
@@ -51,6 +79,8 @@ All screenshots: color scheme Lavender / Red, brightness 100 %.
 | X / Y | Shuffle / repeat |
 | VOL ± | Volume |
 
+If A and B are swapped on your device, use *System › Swap A/B*; *System › Button test* shows the raw key codes.
+
 ## Setup menu
 
 | Category | Options |
@@ -63,31 +93,78 @@ All screenshots: color scheme Lavender / Red, brightness 100 %.
 | Motion | Marquee shows · Marquee style · Marquee speed · Drum · Window transition · Boot animation · Show boot animation |
 | System | Language · Touch control · Swap A/B · Volume display · Button map · Button test · About · Factory reset · Quit |
 
-## Requirements
+## Install
+
+A signed APK is attached to each [release](../../releases). Download it, open it on the device and allow
+installation from unknown sources once, or run `adb install -r`. Updating over an existing install keeps
+all settings, as long as the APK comes from the same release line.
 
 Android 8.0 or newer, designed for 4:3 screens (960×720). Grant "Music and audio" access on first start.
 
 ## Build
 
-```sh
-./build.sh            # APK: P-HR-X1.apk
+Requirements: `podman` (or Docker with the same arguments) and the Android SDK command-line tools.
+
+```bash
+git clone https://github.com/velo-sys/P-HR-X1
+cd P-HR-X1
+./build.sh                       # APK: P-HR-X1.apk
 ```
 
-`build.sh` runs Gradle 8.10 / JDK 17 in a podman container and expects the Android SDK in `../.android-sdk` (override with `ANDROID_SDK`). For your own signing key create `keystore.properties` with `storeFile`, `storePassword`, `keyAlias` and `keyPassword`; without it the debug key is used.
+`build.sh` runs Gradle 8.10 / JDK 17 in a container and expects the Android SDK in `../.android-sdk`
+(override with `ANDROID_SDK`) and a Gradle cache in `../.gradle-home` (override with `GRADLE_CACHE`).
 
-## Project layout
+### Signing a release (optional)
 
-| File | Purpose |
-|---|---|
-| `Engine.kt` | Playback (Media3/ExoPlayer), folder queue, format detection |
-| `Analyzer.kt` | FFT, bands, waveform, levels and beat detection from the PCM stream |
-| `Library.kt` | MediaStore scan and folder tree |
-| `DeckView.kt` | User interface and input |
-| `Viz.kt` · `Drum.kt` · `Pix.kt` | Visualizers, folder drum, pixel buffer and font |
-| `Opts.kt` · `SysInfo.kt` · `Icons.kt` | Options, colors and texts, device info, icons |
+Create a `keystore.properties` in the project root (it is listed in `.gitignore`):
 
-## Legal
+```properties
+storeFile=keystore/your-key.jks
+storePassword=…
+keyAlias=…
+keyPassword=…
+```
 
-P-HR-X1 is an independent project and not affiliated with any device manufacturer. Product names belong to their respective owners.
+Without that file the release build is signed with the debug key.
 
-The Android robot is reproduced or modified from work created and shared by Google and used according to terms described in the Creative Commons 3.0 Attribution License.
+### Your own application ID
+
+If you publish the app under your own name, change `namespace` and `applicationId` in
+`app/build.gradle.kts` (currently `de.y2k.player`) and rename the package directory under
+`app/src/main/java/` to match.
+
+## Under the hood
+
+Kotlin · AndroidX Media3 (ExoPlayer, MediaSession) · custom canvas interface without Compose ·
+hand-written FFT and beat detection · MediaStore · minSdk 26 · APK about 1.2 MB
+
+```
+app/src/main/java/de/y2k/player/
+  Engine.kt      playback, folder queue, options → player, format detection
+  Analyzer.kt    FFT, 32 bands, waveform, levels, beat detection from the PCM stream
+  Library.kt     MediaStore scan, folders as playlists, folder tree for the browser
+  DeckView.kt    the whole interface (440×330 logical, scaled) and input handling
+  Viz.kt         the 24 visualizers
+  Drum.kt        pixel folder drum
+  Pix.kt         pixel buffer, 5×7 font, colors
+  Opts.kt        options, menus, colors, English and German texts
+  SysInfo.kt     device info for the about screen
+docs/            interactive preview page and screenshots
+```
+
+## Contributing
+
+Pull requests are welcome. Two requests:
+
+- `./build.sh` has to pass.
+- Interface text goes through `L("Deutsch", "English")` in both languages.
+
+## License
+
+MIT, see [LICENSE](LICENSE).
+
+The APK ships Apache-2.0 dependencies, and the Android robot is used under CC BY 3.0. What belongs to
+whom is listed in **[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)**.
+
+P-HR-X1 is an independent project and not affiliated with any device manufacturer. Product names belong
+to their respective owners.
