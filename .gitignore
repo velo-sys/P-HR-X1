@@ -11,3 +11,5 @@ keystore.properties
 *.jks
 # private Design-Historie (Runden, Auswahl-Dateien)
 design/
+# privater Arbeitskontext für Claude
+CLAUDE.md
