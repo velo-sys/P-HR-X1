@@ -80,6 +80,7 @@ class DeckView(ctx: Context) : View(ctx), Choreographer.FrameCallback {
     private val aluBmp: Bitmap = makeAlu()
     private val dotPaint = Paint().apply { shader = BitmapShader(makeDots(), Shader.TileMode.REPEAT, Shader.TileMode.REPEAT); isFilterBitmap = false }
     private val scanPaint = Paint().apply { shader = BitmapShader(makeScan(), Shader.TileMode.REPEAT, Shader.TileMode.REPEAT); isFilterBitmap = false }
+    private var sc = 0f; private var ox = 0f; private var oy = 0f   // Skalierung + Rand für 4:3
     private val r = RectF(); private val path = Path(); private val dotMatrix = android.graphics.Matrix()
 
     init {
@@ -157,7 +158,10 @@ class DeckView(ctx: Context) : View(ctx), Choreographer.FrameCallback {
         winP = ease(winP, mode == "win", 5f)
         vizP = ease(vizP, mode == "viz", 4f)
 
-        c.save(); c.scale(width / LW, height / LH)
+        // festes Seitenverhältnis 4:3 – nie breit/hoch ziehen, Rest schwarz (Letterbox)
+        sc = min(width / LW, height / LH); ox = (width - LW * sc) / 2f; oy = (height - LH * sc) / 2f
+        if (ox > .5f || oy > .5f) c.drawColor(0xFF000000.toInt())
+        c.save(); c.translate(ox, oy); c.scale(sc, sc); c.clipRect(0f, 0f, LW, LH)
         drawBitmapFull(c, aluBmp)
         val tr = o["trans"]
         val e = { v: Float -> 1 - (1 - v) * (1 - v) * (1 - v) }
@@ -798,7 +802,8 @@ class DeckView(ctx: Context) : View(ctx), Choreographer.FrameCallback {
     private var tdX = 0f; private var tdY = 0f; private var tdT = 0L
     override fun onTouchEvent(e: android.view.MotionEvent): Boolean {
         if (o["touch"] == 0) return true
-        val lx = e.x * LW / width; val ly = e.y * LH / height
+        if (sc <= 0f) return true
+        val lx = (e.x - ox) / sc; val ly = (e.y - oy) / sc
         when (e.actionMasked) {
             android.view.MotionEvent.ACTION_DOWN -> { tdX = lx; tdY = ly; tdT = System.currentTimeMillis() }
             android.view.MotionEvent.ACTION_UP -> {

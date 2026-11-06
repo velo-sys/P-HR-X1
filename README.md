@@ -99,7 +99,7 @@ A signed APK is attached to each [release](../../releases). Download it, open it
 installation from unknown sources once, or run `adb install -r`. Updating over an existing install keeps
 all settings, as long as the APK comes from the same release line.
 
-Android 8.0 or newer, designed for 4:3 screens (960×720). Grant "Music and audio" access on first start.
+Android 8.0 or newer, designed for 4:3 screens (960×720). On other screens the picture keeps its 4:3 aspect ratio with black bars, it is never stretched. Grant "Music and audio" access on first start.
 
 ## Build
 
