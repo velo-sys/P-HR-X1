@@ -608,6 +608,7 @@ class DeckView(ctx: Context) : View(ctx), Choreographer.FrameCallback {
                 val n = min(l1.length, ((t - 900) / 60).toInt())
                 text(c, l1.take(n), 220f, 160f, 40f, vc, align = Paint.Align.CENTER)
                 if (t > 1900) text(c, "HIGH RESOLUTION AUDIO", 220f, 190f, 16f, v2, align = Paint.Align.CENTER)
+                if (t > 2600) text(c, "vibecoded with Claude", 220f, 300f, 11f, vc, align = Paint.Align.CENTER, alpha = 140)
                 if (t > 2600) text(c, "♫ ${Engine.folders.size} " + L("ORDNER", "FOLDERS") + " · ${Engine.folders.sumOf { it.tracks.size }} " + L("LIEDER", "TRACKS"), 220f, 215f, 13f, vc, align = Paint.Align.CENTER, alpha = 180)
             }
         }

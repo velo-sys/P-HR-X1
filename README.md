@@ -1,5 +1,7 @@
 # P-HR-X1 · Y2K Music Player
 
+*vibecoded with Claude* · [Download the APK](https://github.com/velo-sys/P-HR-X1/releases/latest)
+
 A lightweight, offline music player for Android handhelds with a gamepad, styled like a 2000s hi-fi car deck: brushed aluminium, a glowing VFD display, a pixel-art folder drum and 24 pixel-art visualizers that react to the real audio signal.
 
 Built for 4:3 screens (designed and tested at 960×720 on Android 12) and controlled entirely with the D-pad and face buttons — touch works too.
@@ -76,10 +78,10 @@ Install with `adb install -r P-HR-X1.apk` or copy the APK to the device.
 
 ## Disclaimer
 
-P-HR-X1 is an independent hobby project by velo-sys. It is not affiliated with, endorsed by or sponsored by any device manufacturer or any audio certification body. The on-screen print uses the project's own name; "Hi-Fi" and "HI-RES" are used only as generic descriptions, not as logos. All other product names and trademarks belong to their respective owners and are mentioned only to describe compatibility.
+P-HR-X1 is an independent hobby project by velo-sys, vibecoded with Claude. It is not affiliated with, endorsed by or sponsored by any device manufacturer or any audio certification body. The on-screen print uses the project's own name; "Hi-Fi" and "HI-RES" are used only as generic descriptions, not as logos. All other product names and trademarks belong to their respective owners and are mentioned only to describe compatibility.
 
 ---
 
 ## Kurz auf Deutsch
 
-Leichter Offline-Musikplayer für Android-Handhelds mit Gamepad im Stil eines Hi-Fi-Autoradios der 2000er: Alu-Optik, VFD-Anzeige, Pixel-Walze für die Ordner und 24 Pixel-Visualizer, die auf das echte Signal reagieren. Jeder Ordner ist eine Playlist, die Bedienung läuft über die Tasten (Touch geht auch), Sprache Englisch (Standard) oder Deutsch. Bauen mit `./build.sh`, Vorschau im Browser unter `docs/index.html`.
+Leichter Offline-Musikplayer für Android-Handhelds mit Gamepad im Stil eines Hi-Fi-Autoradios der 2000er: Alu-Optik, VFD-Anzeige, Pixel-Walze für die Ordner und 24 Pixel-Visualizer, die auf das echte Signal reagieren. Jeder Ordner ist eine Playlist, die Bedienung läuft über die Tasten (Touch geht auch), Sprache Englisch (Standard) oder Deutsch. Bauen mit `./build.sh`, Vorschau im Browser unter `docs/index.html`, fertige APK unter *Releases*. Vibecoded with Claude.

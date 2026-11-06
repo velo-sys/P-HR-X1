@@ -240,6 +240,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 </head>
 <body>
 <h1>P-HR-X1 · Y2K Player</h1>
+<p style="margin:-2px 0 12px;color:#c39bff;font-style:italic">vibecoded with Claude</p>
 <p class="intro">Ein Musikplayer im Stil eines Hi-Fi-Decks der 2000er für 4:3-Android-Handhelds mit Gamepad (entwickelt und getestet auf einem 960×720-Gerät mit Android 12): gebürstetes Alu, leuchtende VFD-Anzeige, eine Pixel-Walze für die Ordner und <b>24 Pixel-Visualizer</b>, die auf die Musik reagieren.
 Jeder Ordner ist automatisch eine Playlist, alles läuft über die Gerätetasten (oder Touch), und jedes Farbschema hat genau zwei Farben, hier <b>Lavendel / Rot</b>.
 <b>Ausprobieren:</b> Tasten am Gerät anklicken oder Tastatur benutzen. Die Musik ist hier simuliert. Die App selbst startet auf Englisch und kann auf Deutsch umgestellt werden.</p>
@@ -955,7 +956,7 @@ function createPlayer(host) {
     q(".wt").textContent = "[ " + T[name] + " ]";
     let body = "", foot = "B = ZURÜCK";
     if (name === "keys") body = "A ....... PLAY / PAUSE\nB ....... ORDNER (BASH)\nSTART ... OPTIONEN\nSELECT .. VISUALIZER VOLLBILD\n▲▼ ...... WALZE / ORDNER\n◀▶ ...... LIED · HALTEN=SPULEN\nX / Y ... ZUFALL / WIEDERH.\nVOL ± ... LAUTSTÄRKE";
-    if (name === "about") body = "P-HR-X1\nY2K PLAYER 0.4\n\nOFFLINE · KEINE WERBUNG\nKEIN TRACKING · KEIN KONTO\n\n" + N + " ORDNER · " + TOTAL + " LIEDER";
+    if (name === "about") body = "P-HR-X1\nY2K PLAYER 0.5\nVIBECODED WITH CLAUDE\n\nOFFLINE · KEINE WERBUNG\nKEIN TRACKING · KEIN KONTO\n\n" + N + " ORDNER · " + TOTAL + " LIEDER";
     if (name === "reset") { body = "ALLE OPTIONEN AUF\nWERKSEINSTELLUNG SETZEN?\n\nDEINE MUSIK BLEIBT\nUNBERÜHRT."; foot = "A = JA · B = NEIN"; }
     if (name === "empty") { body = "IN /Music WURDEN KEINE\nORDNER MIT LIEDERN GEFUNDEN.\n\nMUSIK PER USB ODER\nSD-KARTE NACH /Music\nKOPIEREN."; foot = "A = NEU SUCHEN · B = ZURÜCK"; }
     q(".wb").innerHTML = body; q(".wf").textContent = foot;
@@ -1250,6 +1251,6 @@ setInterval(() => { GA.update(true, 1); const vc = hex2rgb(COLORS[GCOL][1]);
   VCANV.forEach(([cv, v, small]) => drawViz(cv, v, GA, cl, small, small ? [5,8,10] : [0,0,0])); }, 50);
 
 </script>
-<p style="max-width:1150px;margin:40px auto 0;color:#666;font-size:12px">P-HR-X1 ist ein unabhängiges Hobbyprojekt (velo-sys) und steht in keiner Verbindung zu Geräte- oder Logo-Herstellern. Alle genannten Marken gehören ihren jeweiligen Inhabern. Die hier gezeigten Lieder und Ordner sind frei erfunden.</p>
+<p style="max-width:1150px;margin:40px auto 0;color:#666;font-size:12px">P-HR-X1 ist ein unabhängiges Hobbyprojekt (velo-sys), vibecoded with Claude, und steht in keiner Verbindung zu Geräte- oder Logo-Herstellern. Alle genannten Marken gehören ihren jeweiligen Inhabern. Die hier gezeigten Lieder und Ordner sind frei erfunden.</p>
 </body>
 </html>

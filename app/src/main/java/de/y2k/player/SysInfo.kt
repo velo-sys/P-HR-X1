@@ -57,6 +57,7 @@ object SysInfo {
         val sr = au.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE)?.toIntOrNull()
         out += "Audio" to "${if (sr != null) "${sr / 1000} kHz" else "?"} · Vol ${au.getStreamVolume(AudioManager.STREAM_MUSIC)}/${au.getStreamMaxVolume(AudioManager.STREAM_MUSIC)}"
         out += "Player" to "Y2K Player ${appVersion(ctx)}"
+        out += "Code" to "vibecoded with Claude"
         out += L("Musik", "Music") to "${Engine.folders.size} " + L("Ordner", "folders") + " · ${Engine.folders.sumOf { it.tracks.size }} " + L("Lieder", "tracks")
         out += L("Schema", "Scheme") to Palette.SCHEMES.getOrNull(Engine.opts["scheme"]).let { if (it == null || it.size < 4) "${Palette.COLORS[Engine.opts["color"]].name} / ${Palette.COLORS.getOrNull(Engine.opts["col2"])?.name ?: "–"}" else L(it[0], it[1]) }
         return out
