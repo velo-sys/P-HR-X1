@@ -286,7 +286,7 @@ const CATS = [
     Item("mspeed", "Laufschrift-Tempo", "Marquee speed", ROLL, {valDe: ["Langsam", "Normal", "Schnell"], valEn: ["Slow", "Normal", "Fast"]}),
     Item("drum", "Walze", "Drum", ROLL, {valDe: ["Federnd", "Weich", "Mechanisch", "Sofort"], valEn: ["Springy", "Smooth", "Mechanical", "Instant"]}),
     Item("trans", "Fensterübergang", "Window transition", ROLL, {valDe: ["Schieben", "Blende", "Scanline"], valEn: ["Slide", "Fade", "Scanline"]}),
-    Item("boot", "Startanimation", "Boot animation", ROLL, {valDe: ["VFD-Test", "Aus"], valEn: ["VFD test", "Off"]}),
+    Item("boot", "Startanimation", "Boot animation", ROLL, {valDe: ["VFD-Test", "Aus", "Pixel-Regen", "Hyperraum"], valEn: ["VFD test", "Off", "Pixel rain", "Hyperspace"]}),
     Item("bootnow", "Startanimation zeigen", "Show boot animation", ACT, {action: "boot"})]),
   Cat("System", "System", "⚙", [
     Item("lang", "Sprache / Language", "Language / Sprache", ROLL, {valDe: ["English", "Deutsch"]}),
@@ -491,7 +491,9 @@ const Analyzer = {
 /* ================================================================
    Viz.kt
    ================================================================ */
-function VC() { return {vc: 0, v2: 0, pk: 0, lvc: 0, lv2: 0, bg: 0, small: false, g(t) { return Col.mix(this.vc, this.v2, t); }}; }
+const VIZ_IDLE = .15;   // calm drift when the music stops
+function VC() { return {vc: 0, v2: 0, pk: 0, lvc: 0, lv2: 0, bg: 0, small: false, act: 0, g(t) { return Col.mix(this.vc, this.v2, t); },
+  mv(base) { return base * (VIZ_IDLE + (1 - VIZ_IDLE) * this.act); }}; }
 function band(a, f) { const x = clamp01(f) * 31, i = Math.trunc(x), r = x - i; return a.b[i] * (1 - r) + a.b[Math.min(31, i + 1)] * r; }
 class Vis { constructor() { this.lb = -1; this.inited = false; this.t = 0; }
   beatEdge(a) { const e = this.lb >= 0 && this.lb !== a.beatN; this.lb = a.beatN; return e; } }
@@ -553,7 +555,6 @@ class VuNeedles extends Vis {
         for (let k = 0; k < w; k += 2) { const f = k / (w - 1); p.set(x0 + k, H - 2, f > .78 ? c.pk : c.g(f), .8); if (k % 10 === 0) p.set(x0 + k, H - 3, c.vc, .6); }
         const xn = x0 + this.n[m] * (w - 1);
         p.line(x0 + w / 2 + (xn - x0 - w / 2) * .25, H + 2, xn, 0, c.lv2);
-        p.text(m === 1 ? "R" : "L", m === 1 ? x0 - 7 : x0 + w + 2, 4, 1, c.vc, .5);
         return;
       }
       const cx = Math.round(W * (m === 1 ? .75 : .25)), py = H - 12, R = 44, x0 = cx - 34, x1 = cx + 34;
@@ -565,7 +566,7 @@ class VuNeedles extends Vis {
       const na = (-40 + this.n[m] * 80) * PI / 180;
       p.line(cx, py, cx + Math.sin(na) * (R - 3), py - Math.cos(na) * (R - 3), c.lv2);
       p.set(cx, py, c.pk); p.set(cx + 1, py, c.pk);
-      p.text(m === 1 ? "R" : "L", x0 + 3, H - 12, 1, c.vc, .7); p.text("VU", cx - 5, py - 20, 1, c.v2, .5);
+      p.text(m === 1 ? "R" : "L", cx - 2, 21, 1, c.vc, .8); p.text("VU", cx - 5, py - 20, 1, c.v2, .5);
     }); }
 }
 class LedMeter extends Vis {
@@ -600,7 +601,7 @@ class Warp extends Vis {
   constructor() { super(); this.stars = Array.from({length: 90}, () => ({x: rnd() * 2 - 1, y: rnd() * 2 - 1, z: rnd()})); }
   draw(p, a, c) { if (!this.inited) { p.clear(c.bg); this.inited = true; }
     p.fade(.5, c.bg);
-    const bass = band(a, .02), sp = .008 + bass * .05, cx = p.w / 2, cy = p.h / 2, kx = c.small ? 60 : 26, ky = c.small ? 5 : 26;
+    const bass = band(a, .02), sp = c.mv(.008) + bass * .05, cx = p.w / 2, cy = p.h / 2, kx = c.small ? 60 : 26, ky = c.small ? 5 : 26;
     for (const s of this.stars) {
       const x0 = cx + s.x / s.z * kx, y0 = cy + s.y / s.z * ky; s.z -= sp;
       if (s.z <= .03) { s.x = rnd() * 2 - 1; s.y = rnd() * 2 - 1; s.z = 1; continue; }
@@ -621,8 +622,8 @@ function ridge(p, a, c, hz, maxH, sunR = 0) {
 }
 class Skyline extends Vis {
   constructor() { super(); this.o = 0; }
-  draw(p, a, c) { const W = p.w, H = p.h; p.clear(c.bg); this.t += .05;
-    const bass = band(a, .02); this.o += .03 + bass * .14; const cx = W / 2, t = this.t;
+  draw(p, a, c) { const W = p.w, H = p.h; p.clear(c.bg); this.t += c.mv(.05);
+    const bass = band(a, .02); this.o += c.mv(.03) + bass * .14; const cx = W / 2, t = this.t;
     if (c.small) { const hz = 9; sun(p, c, cx, hz, 7, t); ridge(p, a, c, hz, 6, 7);
       for (let i = 0; i < 4; i++) { const z = (i + frac(this.o)) / 4, y = hz + 1 + Math.round((H - hz - 1) * z * z); for (let x = 0; x < W; x++) p.set(x, y, c.v2, .3 + .6 * z); }
       for (let j = -12; j <= 12; j++) p.line(cx + j * 3, hz + 1, cx + j * 14, H - 1, c.v2, .35);
@@ -634,26 +635,30 @@ class Skyline extends Vis {
 const CAR = ["...........################...........", "..........#wwwwwwwwwwwwwwww#..........", ".........#wwwwwwwwwwwwwwwwww#.........", "........#wwwwwwwwwwwwwwwwwwww#........", ".......########################.......", "....##############################....", "..##################################..", ".####################################.", "#LLLLLLLLL##################LLLLLLLLL#", "#LLLLLLLLL##################LLLLLLLLL#", "#############PPPPPPPPPPPP#############", "######################################", ".####################################.", "..TTTTTT......................TTTTTT..", "..TTTTTT......................TTTTTT.."];
 const CAR_S = ["...######...", "..#wwwwww#..", ".##########.", "#LL######LL#", ".TT......TT."];
 class NightDrive extends Vis {
-  constructor() { super(); this.stars = null; this.shoot = []; this.off = 0; this.spd = .03; }
-  draw(p, a, c) { const W = p.w, H = p.h, sm = c.small; p.clear(c.bg); this.t += .05; const t = this.t;
+  constructor() { super(); this.stars = null; this.shoot = []; this.off = 0; this.spd = .03; this.curb = 0; }
+  draw(p, a, c) { const W = p.w, H = p.h, sm = c.small; p.clear(c.bg); this.t += c.mv(.05); const t = this.t;
     const cx = W / 2, hz = sm ? 6 : Math.round(H * .46);
     const energy = (band(a, .05) + band(a, .2) + band(a, .45) + band(a, .7)) / 4;
-    this.spd += ((.012 + energy * .24) - this.spd) * .12; this.off += this.spd; const off = this.off;
+    this.spd += ((c.mv(.012) + energy * .24) - this.spd) * .12; this.off += this.spd; const off = this.off;
     const st = this.stars || (this.stars = Array.from({length: sm ? 18 : 45}, () => [rnd() * W, rnd() * (hz - 2), rnd() * 6]));
-    st.forEach(([x, y, ph]) => p.set(x, y, c.vc, .25 + .25 * Math.sin(t * 2 + ph)));
+    st.forEach(([x, y, ph]) => p.set(x, y, c.vc, .25 + .25 * c.act * Math.sin(t * 2 + ph)));
     const beat = this.beatEdge(a);
-    if (rnd() < .012 || (beat && rnd() < .3)) this.shoot.push({x: W * (.3 + rnd() * .7), y: rnd() * hz * .5, vx: -(1.4 + rnd() * 2) * (sm ? 1.6 : 1), vy: (.5 + rnd() * .6) * (sm ? .3 : 1), l: 1});
+    if (rnd() < .012 * c.act || (beat && rnd() < .3)) this.shoot.push({x: W * (.3 + rnd() * .7), y: rnd() * hz * .5, vx: -(1.4 + rnd() * 2) * (sm ? 1.6 : 1), vy: (.5 + rnd() * .6) * (sm ? .3 : 1), l: 1});
     this.shoot = this.shoot.filter(s => { s.l -= .035; s.x += s.vx; s.y += s.vy; return !(s.l <= 0 || s.x < -10 || s.y > hz); });
     this.shoot.forEach(s => { p.line(s.x, s.y, s.x - s.vx * 3, s.y - s.vy * 3, c.lv2, s.l * .5); p.set(s.x, s.y, c.lvc, s.l); });
     sun(p, c, cx, hz, sm ? 5 : 20, t); ridge(p, a, c, hz, sm ? 3 : 12, sm ? 5 : 20);
     const rows = sm ? 3 : 10;
     for (let i = 0; i < rows; i++) { const z = (i + frac(off * 3)) / rows, y = hz + 1 + Math.round((H - hz - 1) * z * z); for (let x = 0; x < W; x++) p.set(x, y, c.v2, .18 + .45 * z); }
+    // curb: double line, color pulses between main and second color (driven by the kick)
+    this.curb += c.mv(.12) + a.kick * .35;
+    const curbC = Col.mix(c.vc, c.v2, .5 + .5 * Math.sin(this.curb)), curbL = .65 + .35 * a.kick;
     for (let y = hz + 1; y < H; y++) {
       const tt = (y - hz) / (H - hz), hw = 1.5 + tt * W * (sm ? .16 : .42);
       for (let x = Math.trunc(cx - hw); x <= Math.trunc(cx + hw); x++) p.set(x, y, Col.mix(c.bg, c.vc, .05));
-      p.set(cx - hw, y, c.v2, .5 + .5 * tt); p.set(cx + hw, y, c.v2, .5 + .5 * tt);
+      const gap = 1 + tt * (sm ? 1 : 3), al = curbL * (.45 + .55 * tt);
+      p.set(cx - hw, y, curbC, al); p.set(cx + hw, y, curbC, al); p.set(cx - hw - gap, y, curbC, al); p.set(cx + hw + gap, y, curbC, al);
       const zz = 1 / (tt + .02);
-      if ((Math.trunc(zz * .9 - off * 6) & 1) === 0) { p.set(cx, y, c.lvc, .4 + .6 * tt); if (!sm && tt > .4) p.set(cx + 1, y, c.lvc, .4 + .6 * tt); }
+      if ((Math.trunc(zz * .9 + off * 6) & 1) === 0) { p.set(cx, y, c.lvc, .4 + .6 * tt); if (!sm && tt > .4) p.set(cx + 1, y, c.lvc, .4 + .6 * tt); }
     }
     const spr = sm ? CAR_S : CAR, bounce = Math.round(a.kick * (sm ? 1 : 2));
     const sx = Math.round(cx - spr[0].length / 2 + Math.sin(t * .7) * (sm ? 1 : 3) * band(a, .4)), sy = H - spr.length - (sm ? 0 : 3) - bounce;
@@ -667,59 +672,114 @@ class NightDrive extends Vis {
 class Lissajous extends Vis {
   constructor() { super(); this.ph = 0; }
   draw(p, a, c) { if (!this.inited) { p.clear(c.bg); this.inited = true; }
-    p.fade(.55, c.bg); this.ph += .03 + band(a, .5) * .05;
+    p.fade(.55, c.bg); this.ph += c.mv(.03) + band(a, .5) * .05;
     const cx = p.w / 2, cy = p.h / 2, aL = .3 + a.L * .7, aR = .3 + a.R * .7;
     const jit = band(a, .9) * (c.small ? 1 : 4), rx = p.w / 2 - (c.small ? 4 : 6), ry = p.h / 2 - (c.small ? 1 : 6);
     let x0 = 0, y0 = 0;
     for (let j = 0; j <= 240; j++) { const th = j / 240 * TAU, x = cx + Math.sin(3 * th + this.ph) * aL * rx, y = cy + Math.sin(2 * th) * aR * ry + (rnd() - .5) * jit;
       if (j > 0) p.line(x0, y0, x, y, c.g(j / 240)); x0 = x; y0 = y; } }
 }
-const DOLPHIN = ["......##........", ".....####.......", "#..###########..", "###############.", "#..##########.##", "....#########...", "......##..##...."];
-function sprite(p, X, Y, slope, c, al) {
-  DOLPHIN.forEach((row, sy) => [...row].forEach((ch, sx) => { if (ch === "#") p.set(X + sx, Y + sy + Math.round((sx - 8) * slope), sy >= 4 ? c.v2 : c.vc, al); }));
-  if (al > .8) p.set(X + 12, Y + 3 + Math.round(4 * slope), c.bg);
+/* ---------- dolphin model "pixel icon": outline in length units (u = 0 fluke … 1 beak tip, y down),
+   rasterized at half resolution on a fixed 2 px grid ---------- */
+function curve(k) { return u => { if (u <= k[0][0]) return k[0][1];
+  for (let i = 1; i < k.length; i++) if (u <= k[i][0]) { const t = (u - k[i - 1][0]) / (k[i][0] - k[i - 1][0]), s = (1 - Math.cos(t * PI)) / 2; return k[i - 1][1] + (k[i][1] - k[i - 1][1]) * s; }
+  return k[k.length - 1][1]; }; }
+function inPoly(x, y, p) { let c = false; for (let i = 0, j = p.length - 1; i < p.length; j = i++) { const [xi, yi] = p[i], [xj, yj] = p[j];
+  if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c; } return c; }
+const D_TOP = curve([[0, -.012], [.06, -.016], [.2, -.045], [.35, -.095], [.5, -.125], [.65, -.125], [.76, -.112], [.83, -.095], [.87, -.075], [.895, -.045], [.905, -.028], [1, -.02]]);
+const D_BOT = curve([[0, .012], [.06, .016], [.22, .05], [.38, .1], [.52, .12], [.66, .11], [.78, .085], [.86, .055], [.9, .03], [.92, .022], [1, .012]]);
+const D_FIN = [[.6, -.115], [.58, -.16], [.55, -.2], [.51, -.235], [.46, -.262], [.42, -.272], [.44, -.25], [.46, -.22], [.47, -.18], [.47, -.14], [.46, -.105]];
+const D_PEC = [[.75, .085], [.72, .13], [.68, .17], [.64, .195], [.61, .205], [.635, .17], [.665, .13], [.69, .095]];
+const D_FLUKE = [[.08, -.014], [.03, -.032], [-.01, -.06], [-.06, -.088], [-.085, -.082], [-.055, -.045], [-.035, -.012], [-.035, .012], [-.055, .045], [-.085, .082], [-.06, .088], [-.01, .06], [.03, .032], [.08, .014]];
+/* 0 nothing, 1 body, 2 pectoral fin, 3 eye */
+function dPart(u, y0, flap) {
+  const y = y0 - flap * Math.min(1.3, Math.max(0, .3 - u) / .3) * .045;   // tail stock bends with the stroke
+  if (inPoly(u, y, D_FLUKE)) return 1;
+  if (u < 0 || u > 1) return 0;
+  if (Math.hypot(u - .83, (y + .03) * 1.4) < .015) return 3;
+  if (y >= D_TOP(u) && y <= D_BOT(u)) return 1;
+  if (inPoly(u, y, D_FIN)) return 1;
+  if (inPoly(u, y, D_PEC)) return 2;
+  return 0;
+}
+/* x0 = fluke start (left), yc = center line, L = length in pixels, wy = water line (dimmed below) */
+function dolphin(p, x0, yc, L, ang, flap, c, wy, al = 1) {
+  const ca = Math.cos(ang), sa = Math.sin(ang), R = L * .75, cx = x0 + L / 2;
+  for (let gy = Math.floor((yc - R) / 2) * 2; gy <= yc + R; gy += 2) for (let gx = Math.floor((cx - R) / 2) * 2; gx <= cx + R; gx += 2) {
+    const dx = gx + 1 - cx, dy = gy + 1 - yc, u = (dx * ca + dy * sa) / L + .5, y = (-dx * sa + dy * ca) / L;
+    const k = dPart(u, y, flap); if (!k) continue;
+    const rel = (y - D_TOP(u)) / Math.max(.001, D_BOT(u) - D_TOP(u));
+    const col = k === 3 ? (L >= 44 ? c.bg : c.vc) : k === 2 ? Col.mix(c.vc, c.v2, .5) : (rel > .58 && u > .18 && u <= 1) ? Col.mix(c.vc, c.v2, clamp01((rel - .58) * 6)) : c.vc;
+    for (let a = 0; a < 2; a++) for (let b = 0; b < 2; b++) { const Y = gy + a; p.set(gx + b, Y, col, al * (Y > wy ? .32 : 1)); }
+  }
 }
 class Dolphins extends Vis {
   constructor() { super(); this.ds = null; this.sp = []; this.bb = []; this.stars = null; }
   draw(p, a, c) { const W = p.w, H = p.h; p.clear(c.bg); const small = c.small;
-    const hz = small ? H - 5 : Math.round(H * .58), depth = small ? 3 : 28;
-    this.t += .05; const t = this.t;
+    const hz = small ? H - 6 : Math.round(H * .45);
+    const bass = band(a, .03), mid = band(a, .35), hi = band(a, .85);
+    this.t += c.mv(.05); const t = this.t;
     if (!small) {
-      const st = this.stars || (this.stars = Array.from({length: 30}, () => [rnd() * W, rnd() * hz * .8]));
-      st.forEach(([x, y], i) => p.set(x, y, i % 2 === 1 ? c.vc : c.v2, .3 + .3 * Math.sin(t * 2 + i)));
-      const sx = W * .72, r = 24;
+      const st = this.stars || (this.stars = Array.from({length: 30}, () => [rnd() * W, rnd() * hz * .85]));
+      st.forEach(([x, y], i) => p.set(x, y, i % 2 === 1 ? c.vc : c.v2, .2 + hi * (.3 + .3 * Math.sin(t * 6 + i))));
+      const sx = W * .72, r = 22;
       for (let y = hz - r; y <= hz; y++) for (let x = Math.trunc(sx - r); x <= Math.trunc(sx + r); x++) {
-        if (Math.hypot(x - sx, y - hz) > r || ((hz - y) % 5 === 0 && y > hz - 16)) continue;
+        if (Math.hypot(x - sx, y - hz) > r || ((hz - y) % 5 === 0 && y > hz - 15)) continue;
         p.set(x, y, Col.mix(c.v2, c.vc, (hz - y) / r), .9); }
     }
-    const dl = this.ds || (this.ds = Array.from({length: 3}, (_, i) => ({x: i * W / 3, ph: -1, h: 0, splashed: false})));
-    if (this.beatEdge(a)) { const d = dl.find(d => d.ph < 0); if (d) { d.ph = 0; d.splashed = false; d.h = (small ? 4 : 20) + band(a, .03) * (small ? 4 : 24); } }
-    const air = [], under = [];
-    dl.forEach(d => {
-      d.x += small ? 1.2 : .9; if (d.x > W + 4) d.x = -18;
-      if (d.ph < 0) return;
-      d.ph += .03;
-      if (d.ph < 1) air.push([d.x, hz - 4 - Math.sin(d.ph * PI) * d.h, -Math.cos(d.ph * PI) * .45]);
-      else {
-        const q = (d.ph - 1) / .95, y = hz - 3 + Math.sin(q * PI) * depth;
-        under.push([d.x, y, Math.cos(q * PI) * .45]);
-        if (!d.splashed) { d.splashed = true; for (let k = 0; k < 9; k++) this.sp.push({x: d.x + 8, y: hz, vx: (rnd() - .5) * 1.6, vy: -rnd() * 2.2, l: 1}); }
-        if (rnd() < .3) this.bb.push({x: d.x + 4 + rnd() * 8, y, vx: 0, vy: 0, l: 1});
-        if (d.ph >= 1.95) d.ph = -1;
+    // water: swell follows the mids, glitter the highs
+    const wav = (small ? .3 : .6) + mid * (small ? 1 : 2.2);
+    for (let wy = hz; wy < H; wy += small ? 2 : 3) for (let x = 0; x < W; x++) { const yy = wy + Math.round(Math.sin(x * .2 + t * 2 + wy) * wav);
+      p.set(x, yy, c.g((wy - hz) / (H - hz + 1)), small ? .5 : .22 + .4 * (wy - hz) / (H - hz)); }
+    const ng = Math.trunc(hi * c.act * (small ? 4 : 16));
+    for (let k = 0; k < ng; k++) { const gx = rnd() * W, gy = hz + Math.trunc(rnd() * (small ? 2 : 9)) * (small ? 2 : 3);
+      p.set(gx, gy + Math.sin(gx * .2 + t * 2 + gy) * wav, c.lvc, .6 + .4 * rnd()); }
+    // pod: each dolphin has its band; bass swims in front and big, highs far back and small
+    const n = small ? 4 : 6;
+    const dl = this.ds || (this.ds = Array.from({length: n}, (_, i) => ({f: i / (n - 1) * .85, z: small ? 0 : i / (n - 1), sp: .85 + rnd() * .3,
+      x: -999, ph: -1, h: 0, splashed: false, avg: 0, cool: 0, parked: true, fp: rnd() * 6})));
+    const want = 1 + c.act * (n - 1) * 1.15;
+    if (!this.inited) { this.inited = true; dl.forEach((d, i) => { if (i < want) { d.parked = false; d.x = rnd() * (W - 20); } }); }   // already in the picture when switching
+    const beat = this.beatEdge(a);
+    let beatUsed = false;
+    for (let i = dl.length - 1; i >= 0; i--) {   // far ones first
+      const d = dl[i], active = i < want;
+      const sc = small ? .5 : .55 + (1 - d.z) * 1.1, L = 30 * sc, h = L * .22;
+      const lane = small ? hz + 1 : hz + 4 + Math.pow(1 - d.z, 1.2) * (H - 18 - hz);
+      if (d.parked) { if (!active) continue; d.parked = false; d.x = -L - rnd() * 30; }   // swims in from the left
+      d.x += c.mv(small ? 1.1 : .8) * d.sp * (.6 + sc * .4);
+      if (d.x > W + 2) { if (active) d.x = -L - rnd() * 20; else { d.parked = true; continue; } }   // extra ones swim out of the picture
+      // jump when its own band kicks in (the bass dolphin also on the beat)
+      const v = band(a, d.f); d.avg = d.avg * .9 + v * .1; if (d.cool > 0) d.cool--;
+      const canJump = active && d.ph < 0 && d.cool === 0 && d.x > 2 && d.x < W - L - 2;
+      const onset = v > d.avg * 1.3 + .05 && v > .28 && rnd() < .5;
+      const beatJump = beat && !beatUsed && i === dl.findIndex(o => o.ph < 0 && !o.parked);
+      if (canJump && (onset || beatJump)) { if (beatJump) beatUsed = true;
+        d.ph = 0; d.splashed = false; d.cool = 25; d.h = small ? 3 + v * 6 : (6 + v * 30) * (.55 + .45 * sc); }
+      d.fp += c.mv(.35) * (1.4 - sc * .3);   // tail stroke
+      let yc = lane - h * .1 + Math.sin(t * 2 + i * 1.7) * .8 * sc, ang = 0, flap = Math.sin(d.fp) * (.5 + .5 * c.act);
+      if (d.ph >= 0) {
+        d.ph += .028 * (.6 + c.act * .6) * (1.3 - sc * .2);
+        if (d.ph < 1) { yc = lane - h * .1 - Math.sin(d.ph * PI) * d.h; ang = -Math.cos(d.ph * PI) * .55; flap *= .3; }
+        else {
+          const q = Math.min(1, Math.max(0, (d.ph - 1) / .7));
+          yc = lane - h * .1 + Math.sin(q * PI) * h * 1.6; ang = Math.cos(q * PI) * .35 * (1 - q);
+          if (!d.splashed) { d.splashed = true; const m = Math.trunc((5 + v * 10 + a.kick * 6) * (.5 + sc * .5));
+            for (let k = 0; k < m; k++) this.sp.push({x: d.x + L * .6, y: lane, vx: (rnd() - .5) * (1 + bass) * (.6 + sc * .5), vy: -rnd() * (1.4 + bass * 2) * (.6 + sc * .5), l: 1}); }
+          if (!small && rnd() < .3) this.bb.push({x: d.x + rnd() * L, y: lane + rnd() * h, vx: 0, vy: 0, l: 1});
+          if (q >= 1) d.ph = -1;   // surfaces again and swims on
+        }
       }
-    });
-    under.forEach(([x, y, s]) => sprite(p, Math.round(x), Math.round(y), s, c, .45));
+      dolphin(p, d.x, yc, L, ang, flap, c, lane, small ? 1 : .75 + .25 * (1 - d.z));
+    }
     this.bb = this.bb.filter(b => { b.l -= .03; b.y -= .5; return !(b.l <= 0 || b.y <= hz); });
-    this.bb.forEach(b => p.set(b.x + Math.sin(b.y * .6), b.y, c.lv2, b.l * .8));
-    for (let y = hz; y < H; y += small ? 2 : 3) for (let x = 0; x < W; x++) { const yy = y + Math.round(Math.sin(x * .2 + t * 2 + y) * .8);
-      p.set(x, yy, c.g((y - hz) / (H - hz + 1)), small ? .6 : .3 + .45 * (y - hz) / (H - hz)); }
-    air.forEach(([x, yy, s]) => sprite(p, Math.round(x), Math.round(yy), s, c, 1));
-    this.sp = this.sp.filter(s => { s.l -= .06; return s.l > 0; });
+    this.bb.forEach(b => p.set(b.x + Math.sin(b.y * .6), b.y, c.lv2, b.l * .7));
+    this.sp = this.sp.filter(s => { s.l -= .05; return s.l > 0; });
     this.sp.forEach(s => { s.x += s.vx; s.y += s.vy; s.vy += .18; p.set(s.x, s.y, c.lv2, s.l); });
   }
 }
 class Plasma extends Vis {
-  draw(p, a, c) { const bass = band(a, .03); this.t += .04 + bass * .16; const t = this.t;
+  draw(p, a, c) { const bass = band(a, .03); this.t += c.mv(.04) + bass * .16; const t = this.t;
     const cx = p.w / 2, cy = p.h / 2, e = .35 + .65 * Math.min(1, bass * 1.3), fy = c.small ? 3 : 1;
     for (let y = 0; y < p.h; y++) for (let x = 0; x < p.w; x++) {
       const v = (Math.sin(x * .16 + t) + Math.sin(y * fy * .13 + t * 1.3) + Math.sin((x + y * fy) * .09 + t * .7) + Math.sin(Math.hypot(x - cx, (y - cy) * fy) * .17 - t * 2) + 4) / 8;
@@ -727,7 +787,7 @@ class Plasma extends Vis {
       p.set(x, y, c.g(q), (.25 + .75 * q) * e); } }
 }
 class Tunnel extends Vis {
-  draw(p, a, c) { this.t += .03 + band(a, .03) * .12; const t = this.t;
+  draw(p, a, c) { this.t += c.mv(.03) + band(a, .03) * .12; const t = this.t;
     const cx = p.w / 2, cy = p.h / 2, ky = c.small ? 5 : 1;
     for (let y = 0; y < p.h; y++) for (let x = 0; x < p.w; x++) {
       const dx = x - cx, dy = (y - cy) * ky, r = Math.hypot(dx, dy) + .01, u = 40 / r + t;
@@ -737,14 +797,14 @@ class Tunnel extends Vis {
 class Galaxy extends Vis {
   constructor() { super(); this.stars = Array.from({length: 280}, (_, i) => { const r = Math.pow(rnd(), .6) * 50; return {r, a: (i % 2) * PI + r * .18 + rnd() * .5}; }); this.rot = 0; }
   draw(p, a, c) { if (!this.inited) { p.clear(c.bg); this.inited = true; }
-    p.fade(.4, c.bg); this.rot += .02 + band(a, .4) * .03;
+    p.fade(.4, c.bg); this.rot += c.mv(.02) + band(a, .4) * .03;
     const cx = p.w / 2, cy = p.h / 2, kx = c.small ? 1.3 : 1.35, ky = c.small ? .12 : .7;
     this.stars.forEach(s => { const ang = s.a + this.rot * (1.5 / (1 + s.r * .05)); p.set(cx + Math.cos(ang) * s.r * kx, cy + Math.sin(ang) * s.r * ky, c.g(s.r / 50), .55 + .6 * band(a, s.r / 50)); });
     const core = 1 + band(a, .02) * (c.small ? 2 : 5);
     for (let an = 0; an < TAU; an += .3) for (let r = 0; r <= core; r += .7) p.set(cx + Math.cos(an) * r * kx, cy + Math.sin(an) * r * (c.small ? .5 : ky), c.pk); }
 }
 class Lava extends Vis {
-  draw(p, a, c) { p.clear(c.bg); this.t += .03; const t = this.t;
+  draw(p, a, c) { p.clear(c.bg); this.t += c.mv(.03); const t = this.t;
     const cx = p.w / 2, cy = p.h / 2, sm = c.small;
     const balls = Array.from({length: 5}, (_, i) => [cx + Math.sin(t * (.5 + i * .13) + i) * p.w * .36, cy + Math.cos(t * (.4 + i * .17) + i * 2) * p.h * .34, (sm ? 3 : 8) + band(a, i / 4) * (sm ? 4 : 12)]);
     for (let y = 0; y < p.h; y++) for (let x = 0; x < p.w; x++) {
@@ -755,21 +815,55 @@ class Lava extends Vis {
       p.set(x, y, c.g(fd > 2.2 ? 1 : fd > 1.4 ? .55 : .15), f < 1 ? .5 : 1); } }
 }
 class Orbit extends Vis {
-  constructor() { super(); this.st = null; }
-  draw(p, a, c) { const W = p.w, H = p.h; p.clear(c.bg); const sm = c.small, bass = band(a, .03); this.t += .02 + band(a, .4) * .03; const t = this.t;
-    (this.st || (this.st = Array.from({length: sm ? 12 : 40}, () => [rnd() * W, rnd() * H]))).forEach(([x, y]) => p.set(x, y, c.vc, .25));
-    const cx = W / 2, cy = H / 2, R = sm ? 6 : 16, rx = (sm ? 16 : 30) + bass * (sm ? 3 : 5), ry = sm ? 2 : 7;
-    const ring = front => { for (let an = 0; an < TAU; an += .02) { const y = cy + Math.sin(an) * ry;
-      if ((y > cy) === front) for (let k = 0; k < (sm ? 1 : 3); k++) p.set(cx + Math.cos(an) * (rx - k * 2), cy + Math.sin(an) * (ry - k * .6), c.g(k / 3), front ? 1 : .5); } };
-    ring(false);
+  constructor() { super(); this.st = null; this.waves = []; this.sparks = []; this.moonA = Array.from({length: 6}, (_, i) => i * 1.7); this.moonV = new Float32Array(6); this.spin = 0; }
+  draw(p, a, c) { const W = p.w, H = p.h; p.clear(c.bg); const sm = c.small;
+    const bass = band(a, .03), mid = band(a, .4), hi = band(a, .85);
+    this.t += c.mv(.02) + mid * .03 * c.act; this.spin += c.mv(.03) + mid * .06 * c.act; const t = this.t, spin = this.spin;
+    // stars twinkle with the highs
+    (this.st || (this.st = Array.from({length: sm ? 14 : 50}, () => ({x: rnd() * W, y: rnd() * H, ph: rnd() * 6})))).forEach(s =>
+      p.set(s.x, s.y, c.vc, .14 + hi * (.35 + .3 * Math.sin(t * 9 + s.ph))));
+    const cx = W / 2, cy = H / 2, R = sm ? 6 : 16;
+    const rx = (sm ? 16 : 30) + bass * (sm ? 3 : 5), ry = sm ? 2 : 7, k = ry / rx;
+    // shock wave in the ring plane on every beat
+    if (this.beatEdge(a) && this.waves.length < 4) this.waves.push({r: rx, l: .5 + a.kick * .5});
+    this.waves = this.waves.filter(w => { w.r += sm ? 2.4 : 1.7; w.l -= .04; return w.l > 0; });
+    this.waves.forEach(w => { for (let an = 0; an < TAU; an += sm ? .03 : .02) p.set(cx + Math.cos(an) * w.r, cy + Math.sin(an) * w.r * k * (sm ? 1.4 : 1), c.v2, w.l * .7); });
+    // moons: more energy, more moons; each one follows its own band
+    const nM = sm ? 4 : 6, want = 1 + c.act * (nM - 1) * 1.15;
+    const moons = front => {
+      for (let i = 0; i < nM; i++) {
+        if (this.moonV[i] < .04) continue;
+        const v = band(a, i / (nM - 1)), an = this.moonA[i];
+        if ((Math.sin(an) > 0) !== front) continue;
+        const fx = sm ? 1.35 + i * .55 : 1.25 + i * .19, fy = sm ? 1.6 + i * .4 : 1.7 + i * .45;
+        const x = cx + Math.cos(an) * rx * fx, y = cy + Math.sin(an) * ry * fy;
+        if (!front && Math.hypot(x - cx, y - cy) < R + 1) continue;
+        const col = i % 2 === 1 ? c.v2 : c.pk, al = this.moonV[i] * (front ? 1 : .55);
+        if (!sm && c.act > .35) for (let j = 1; j <= 4; j++) { const ta = an - j * .07 * (i % 2 === 1 ? -1 : 1);
+          p.set(cx + Math.cos(ta) * rx * fx, cy + Math.sin(ta) * ry * fy, col, al * (.45 - j * .1) * c.act); }
+        const mr = sm ? 0 : Math.trunc(v * 2.6);
+        for (let dy = -mr; dy <= mr + 1; dy++) for (let dx = -mr; dx <= mr + 1; dx++) if (Math.hypot(dx - .5, dy - .5) <= mr + .8) p.set(x + dx, y + dy, col, al);
+      } };
+    for (let i = 0; i < nM; i++) {
+      this.moonV[i] += ((i < want ? 1 : 0) - this.moonV[i]) * .07;
+      this.moonA[i] += (c.mv(.05) * (1.3 - i * .12) + band(a, i / (nM - 1)) * .06 * c.act) * (i % 2 === 1 ? -1 : 1);
+    }
+    // ring as a round spectrum, texture spins along
+    const ring = front => { for (let an = 0; an < TAU; an += .02) { const s = Math.sin(an);
+      if ((s > 0) === front) { const v = band(a, (1 - Math.cos(an)) / 2);
+        for (let j = 0; j < (sm ? 1 : 3); j++) { const rr = rx - j * 2 + v * (sm ? 3 : 9) * (1 - j * .3), tex = .7 + .3 * Math.sin(an * 9 - spin * 5 + j);
+          p.set(cx + Math.cos(an) * rr, cy + s * (ry - j * .6) * (rr / rx), c.g(j / 3 + v * .3), (front ? 1 : .5) * tex); } } } };
+    moons(false); ring(false);
     for (let y = -R; y <= R; y++) for (let x = -R; x <= R; x++) { if (Math.hypot(x, y) > R) continue;
       const light = Math.max(.15, (-x * .5 - y * .6) / R + .7), bnd = .5 + .5 * Math.sin(y * .9 + t * 3);
       p.set(cx + x, cy + y, Col.mix(c.v2, c.vc, bnd), light); }
-    ring(true);
-    [[1.4, 1.6, .9], [1.8, 2.2, -.6], [2.2, 2.8, .4]].forEach(([fx, fy, s], i) => {
-      const an = t * s * 3 + i * 2, x = cx + Math.cos(an) * rx * fx * (sm ? 1.6 : 1), y = cy + Math.sin(an) * ry * fy * (sm ? 1.5 : 1.6);
-      const col = i % 2 === 1 ? c.v2 : c.pk;
-      p.set(x, y, col); p.set(x + 1, y, col); if (!sm) { p.set(x, y + 1, c.pk); p.set(x + 1, y + 1, c.pk); } }); }
+    ring(true); moons(true);
+    // sparks from the ring on the highs
+    if (!sm && rnd() < hi * c.act * 1.2) { const n = 1 + Math.trunc(hi * 3);
+      for (let q = 0; q < n; q++) { const an = rnd() * TAU, sp = .6 + rnd() * 1.2;
+        this.sparks.push({x: cx + Math.cos(an) * rx, y: cy + Math.sin(an) * ry, vx: Math.cos(an) * sp, vy: Math.sin(an) * sp * .5, l: 1}); } }
+    this.sparks = this.sparks.filter(s => { s.x += s.vx; s.y += s.vy; s.l -= .05; return s.l > 0; });
+    this.sparks.forEach(s => p.set(s.x, s.y, c.lv2, s.l)); }
 }
 class Cells extends Vis {
   constructor() { super(); this.g = new Int8Array(0); this.f = 0; this.seeded = false; }
@@ -779,7 +873,8 @@ class Cells extends Vis {
     if (this.beatEdge(a) || !this.seeded) { this.seeded = true;
       for (let n = 0; n < (c.small ? 14 : 60); n++) { const x = Math.trunc(rnd() * gw); if (rnd() > band(a, x / gw) + .2) continue;
         const y = Math.trunc(rnd() * gh); for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (rnd() < .5) g[((y + dy + gh) % gh) * gw + (x + dx + gw) % gw] = 1; } }
-    if (++this.f % 3 === 0) { const n = new Int8Array(gw * gh);
+    this.f += Math.min(1, VIZ_IDLE + c.act * 1.3) / 3;   // slower without music
+    if (this.f >= 1) { this.f -= 1; const n = new Int8Array(gw * gh);
       for (let y = 0; y < gh; y++) for (let x = 0; x < gw; x++) { let k = 0;
         for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if ((dx !== 0 || dy !== 0) && g[((y + dy + gh) % gh) * gw + (x + dx + gw) % gw] > 0) k++;
         const ag = g[y * gw + x];
@@ -791,7 +886,7 @@ class Cells extends Vis {
       for (let i = 0; i < cs; i++) for (let j = 0; j < cs; j++) if (c.small || !(i > 0 && j > 0)) p.set(x * cs + j, y * cs + i, col); } }
 }
 class Kaleido extends Vis {
-  draw(p, a, c) { const W = p.w, H = p.h; p.clear(c.bg); this.t += .04 + band(a, .03) * .08; const t = this.t;
+  draw(p, a, c) { const W = p.w, H = p.h; p.clear(c.bg); this.t += c.mv(.04) + band(a, .03) * .08; const t = this.t;
     const hw = Math.ceil(W / 2), hh = c.small ? H : Math.ceil(H / 2);
     for (let y = 0; y < hh; y++) for (let x = 0; x < hw; x++) {
       const d1 = x / hw, d2 = y / hh, v = band(a, (d1 * d1 + d2 * d2) / 2);
@@ -805,7 +900,7 @@ class Dna extends Vis {
   constructor() { super(); this.bc = 0; this.tsp = .06; this.spd = .06; }
   draw(p, a, c) { const W = p.w, H = p.h; p.clear(c.bg);
     if (this.beatEdge(a)) { this.bc++; if (this.bc % 8 === 0) this.tsp = [-.06, .015, .05, .09, .15, .22][Math.min(5, Math.trunc(rnd() * 6))]; }
-    const tgt = this.tsp * (.45 + 1.3 * band(a, .4)) + a.kick * .035 * Math.sign(this.tsp);
+    const tgt = (this.tsp * (.45 + 1.3 * band(a, .4)) + a.kick * .035 * Math.sign(this.tsp)) * Math.min(1, VIZ_IDLE + c.act * 1.2);
     this.spd += (tgt - this.spd) * .06; this.t += this.spd; const t = this.t;
     const cy = (H - 1) / 2, amp = (c.small ? 6 : H * .3) * (.65 + .35 * band(a, .4));
     for (const back of [1, 0]) for (let x = 0; x < W; x++) {
@@ -820,35 +915,56 @@ class Dna extends Vis {
 class Rain extends Vis {
   constructor() { super(); this.drops = []; }
   draw(p, a, c) { p.clear(c.bg); const cols = Math.trunc(p.w / 2), len = c.small ? 5 : 16, bass = band(a, .03);
-    for (let i = 0; i < cols; i++) if (rnd() < band(a, i / cols) * .08 + .004) this.drops.push({x: i * 2, y: -1, sp: .5 + rnd() * 1.2});
+    for (let i = 0; i < cols; i++) if (rnd() < band(a, i / cols) * .08 + .004 * c.act) this.drops.push({x: i * 2, y: -1, sp: .5 + rnd() * 1.2});
     this.drops = this.drops.filter(d => { d.y += d.sp * (1 + bass * 1.5); return !(d.y - len >= p.h); });
     this.drops.forEach(d => { for (let k = 0; k < len; k++) { const y = Math.round(d.y) - k; if (y < 0 || y >= p.h) continue;
       p.set(d.x, y, k === 0 ? c.lv2 : c.g(k / len), k === 0 ? 1 : 1 - k / len); } }); }
 }
 class Poly extends Vis {
-  constructor() { super(); this.an = 0;
+  constructor() { super(); this.an = 0; this.inner = .55; this.pv = [0, 0, 0]; this.sparks = [];
     this.V = [[-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1], [-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1]];
     this.E = [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]];
-    this.O = [[.78, 0, 0], [-.78, 0, 0], [0, .78, 0], [0, -.78, 0], [0, 0, .78], [0, 0, -.78]];
-    this.OE = [[0, 2], [0, 3], [0, 4], [0, 5], [1, 2], [1, 3], [1, 4], [1, 5], [2, 4], [2, 5], [3, 4], [3, 5]]; }
-  draw(p, a, c) { p.clear(c.bg); this.an += .03 + band(a, .4) * .05;
-    const one = (cx, cy, s, ang) => {
-      const pr = v => { const X = v[0] * Math.cos(ang) - v[2] * Math.sin(ang); let Z = v[0] * Math.sin(ang) + v[2] * Math.cos(ang);
-        const Y = v[1] * Math.cos(ang * .7) - Z * Math.sin(ang * .7); Z = v[1] * Math.sin(ang * .7) + Z * Math.cos(ang * .7);
-        const k = 3.5 / (Z + 3.5); return [cx + X * s * k, cy + Y * s * k]; };
-      this.E.forEach(([i, j]) => { const [x0, y0] = pr(this.V[i]), [x1, y1] = pr(this.V[j]); p.line(x0, y0, x1, y1, c.vc); });
-      this.OE.forEach(([i, j]) => { const [x0, y0] = pr(this.O[i]), [x1, y1] = pr(this.O[j]); p.line(x0, y0, x1, y1, c.v2); }); };
-    if (c.small) for (let i = 0; i < 6; i++) one(p.w * (i + .5) / 6, p.h / 2, 4.2 * (1 + band(a, i / 5) * .5), this.an + i * .6);
-    else one(p.w / 2, p.h / 2, 24 * (1 + band(a, .03) * .35), this.an); }
+    this.O = [[.95, 0, 0], [-.95, 0, 0], [0, .95, 0], [0, -.95, 0], [0, 0, .95], [0, 0, -.95]];
+    this.OE = [[0, 2], [0, 3], [0, 4], [0, 5], [1, 2], [1, 3], [1, 4], [1, 5], [2, 4], [2, 5], [3, 4], [3, 5]];
+    this.T = [[.5, .5, .5], [.5, -.5, -.5], [-.5, .5, -.5], [-.5, -.5, .5]];
+    this.TE = [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]]; }
+  pr(v, cx, cy, s, ang) { const X = v[0] * Math.cos(ang) - v[2] * Math.sin(ang); let Z = v[0] * Math.sin(ang) + v[2] * Math.cos(ang);
+    const Y = v[1] * Math.cos(ang * .7) - Z * Math.sin(ang * .7); Z = v[1] * Math.sin(ang * .7) + Z * Math.cos(ang * .7);
+    const k = 3.5 / (Z + 3.5); return [cx + X * s * k, cy + Y * s * k]; }
+  shape(p, vs, es, cx, cy, s, ang, col, al = 1) { es.forEach(([i, j]) => { const [x0, y0] = this.pr(vs[i], cx, cy, s, ang), [x1, y1] = this.pr(vs[j], cx, cy, s, ang); p.line(x0, y0, x1, y1, col, al); }); }
+  // all three anchored in the cube (same rotation), size and glow each from its own band
+  one(p, cx, cy, s, ang, c, vb, vm, vh, inr, full) {
+    const lit = (col, v) => Col.mix(col, Col.WHITE, Math.max(0, v - .55) * .9);
+    this.shape(p, this.V, this.E, cx, cy, s, ang, full ? lit(c.vc, vb) : c.vc);
+    this.shape(p, this.O, this.OE, cx, cy, full ? 24 * inr * (1 + vm * .45) : s, ang, full ? lit(c.v2, vm) : c.v2);
+    if (full) this.shape(p, this.T, this.TE, cx, cy, 24 * inr * (1 + vh * .6), ang, lit(c.lvc, vh), .5 + .5 * Math.min(1, vh * 1.5)); }
+  draw(p, a, c) { const bass = band(a, .03), mid = band(a, .4), hi = band(a, .85);
+    this.an += c.mv(.03) + mid * .06 * c.act; const an = this.an;
+    if (c.small) { p.clear(c.bg);
+      for (let i = 0; i < 6; i++) { const v = band(a, i / 5);
+        this.one(p, p.w * (i + .5) / 6, p.h / 2 + Math.sin(this.t + i * 1.3) * v * 2.5, 4.2 * (1 + v * .5), an * (1 + i * .15) + i * .6, c, v, v, 0, 1, false); }
+      this.t += c.mv(.15); return; }
+    // each body pulses on its own band: cube = bass, octahedron = mids, tetrahedron = highs
+    [bass, mid, hi].forEach((v, k) => { this.pv[k] += (v - this.pv[k]) * (v > this.pv[k] ? .6 : .25); });
+    this.inner += ((.55 + .45 * c.act) - this.inner) * .05;   // the inner ones shrink in silence
+    if (!this.inited) { p.clear(c.bg); this.inited = true; }
+    p.fade(.12 + c.act * .5, c.bg);
+    const cx = p.w / 2, cy = p.h / 2, s = 24 * (1 + this.pv[0] * .35);
+    this.one(p, cx, cy, s, an, c, this.pv[0], this.pv[1], this.pv[2], this.inner, true);
+    if (this.beatEdge(a)) this.V.forEach(v => { if (rnd() < .35 + a.kick * .65) { const [x, y] = this.pr(v, cx, cy, s, an);
+      const dx = x - cx, dy = y - cy, l = Math.max(1, Math.hypot(dx, dy)), sp = 1.2 + bass * 2;
+      this.sparks.push({x, y, vx: dx / l * sp, vy: dy / l * sp, l: 1}); } });
+    this.sparks = this.sparks.filter(s => { s.x += s.vx; s.y += s.vy; s.l -= .045; return s.l > 0; });
+    this.sparks.forEach(s => { p.set(s.x, s.y, c.lv2, s.l); p.set(s.x - s.vx, s.y - s.vy, c.v2, s.l * .5); }); }
 }
 class Jelly extends Vis {
   constructor() { super(); this.full = null; this.side = null; }
-  draw(p, a, c) { const W = p.w, H = p.h; p.clear(c.bg); this.t += .05; const t = this.t;
+  draw(p, a, c) { const W = p.w, H = p.h; p.clear(c.bg); this.t += c.mv(.05); const t = this.t;
     const pulse = a.kick, hi = band(a, .85);
     if (c.small) {
       const qs = this.side || (this.side = [{x: 20, dir: 1}, {x: W - 25, dir: -1}, {x: W * .55, dir: 1}, {x: W * .3, dir: -1}]);
       qs.forEach((q, i) => {
-        q.x += q.dir * (.45 + pulse * 1.3 + i * .08); if (q.x > W + 30) q.x = -30; if (q.x < -30) q.x = W + 30;
+        q.x += q.dir * (c.mv(.45 + i * .08) + pulse * 1.3); if (q.x > W + 30) q.x = -30; if (q.x < -30) q.x = W + 30;
         const y = H / 2 + Math.sin(t * .8 + i * 2) * 1.5, ry = 6 * (1 + pulse * .12), rx = 4.5 * (1 - pulse * .3), d = q.dir;
         for (let k = 0; k < 4; k++) { let x0 = q.x, y0 = y + (k - 1.5) * 2.4;
           for (let j = 1; j <= 20; j++) { const x1 = q.x - d * j * 1.15;
@@ -864,7 +980,7 @@ class Jelly extends Vis {
     const NT = 5, NS = 16, seg = 1.6;
     const qs = this.full || (this.full = Array.from({length: 3}, (_, i) => ({x: (i + .5) * W / 3, y: H * (.3 + i * .25), s: .8 + i * .25, tn: null})));
     qs.forEach((q, i) => {
-      q.y -= .25 + pulse * .9; if (q.y < -24) { q.y = H + 26; q.x = 15 + rnd() * (W - 30); q.tn = null; }
+      q.y -= c.mv(.25) + pulse * .9; if (q.y < -24) { q.y = H + 26; q.x = 15 + rnd() * (W - 30); q.tn = null; }
       const rx = 11 * q.s * (1 - pulse * .22), ry = 8 * q.s * (1 + pulse * .18);
       const tn = q.tn || (q.tn = Array.from({length: NT}, () => Array.from({length: NS}, () => ({x: q.x, y: q.y}))));
       tn.forEach((tt, k) => {
@@ -1032,7 +1148,7 @@ let dmsg = "", dmsgUntil = 0, seekDir = 0, seekShowUntil = 0;
 let termP = 0, optP = 0, winP = 0, vizP = 0, optScroll = 0;
 const anim = new Map();
 const drum = new Drum(), audio = new Audio(), va = new Audio();
-const pixS = new Pix(132, 15), pixF = new Pix(147, 110);
+const pixS = new Pix(132, 15), pixF = new Pix(146, 110);
 let vizS = null, vizSi = -1, vizF = null, vizFi = -1;
 const vcx = VC();
 let lastLogic = 0, mqClock = 0, lastFrame = 0;
@@ -1049,13 +1165,28 @@ function logic(now) {
   for (let i = 0; i < 32; i++) va.b[i] = audio.b[i] * inten;
   for (let j = 0; j < 128; j++) va.w[j] = audio.w[j] * inten;
   va.L = audio.L * inten; va.R = audio.R * inten; va.kick = audio.kick * inten; va.beatN = audio.beatN;
+  // activity: rises quickly with the music, falls to 0 about 1.5 s after it stops
+  let en = 0; for (let i = 0; i < 32; i++) en += va.b[i];
+  const actT = clamp01(en / 32 * 2.2); vcx.act += (actT - vcx.act) * (actT > vcx.act ? .25 : .07); if (vcx.act < .003) vcx.act = 0;
   drum.mode = o.drum; drum.step();
   if (!drumSynced && n > 0) { drum.jump(Engine.cur); drumSynced = true; }
   if (vizSi !== o.viz) { vizSi = o.viz; vizS = Viz.create(vizSi); }
   if (vizFi !== o.viz) { vizFi = o.viz; vizF = Viz.create(vizFi); }
   fillVc(true);
-  if (mode === "viz" || vizP > .01 || (mode === "opt" && (curItem() || {}).k === "viz")) { vcx.bg = 0; vcx.small = false; vizF.draw(pixF, va, vcx); pixF.flush(); }
+  if (mode === "viz" || vizP > .01 || (mode === "opt" && (curItem() || {}).k === "viz")) { vcx.bg = 0; vcx.small = false; vizF.draw(pixF, va, vcx); vizNameFlush(now); }
   if (mode !== "viz") { vcx.bg = 0x05080A; vcx.small = true; vizS.draw(pixS, va, vcx); pixS.flush(); }
+}
+/* visualizer name in full screen: 5x7 pixel font in the second color, black space around it, right in the dot raster */
+let vizNameUntil = 0;
+function vizNameFlush(now) {
+  if (mode !== "viz" || now >= vizNameUntil) { pixF.flush(); return; }
+  const s = Viz.label(o.viz).toUpperCase(), w = Font.width(s) + 6, h = 7 + 6;
+  const x0 = Math.trunc((pixF.w - w) / 2), y0 = o.vizinfo === 1 ? 11 : 4;
+  const save = pixF.px.slice();
+  for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) pixF.set(x, y, 0);
+  pixF.text(s, x0 + 3, y0 + 3, 1, vcx.v2);
+  pixF.flush();
+  pixF.px.set(save);   // afterglow visualizers must not drag the box along
 }
 function fillVc(forViz) {
   const sw = forViz && o.col2m === 1 && (audio.beatN & 1) === 1;
@@ -1195,7 +1326,7 @@ function drawPlayer(c, now) {
   icon(c, st, 418 - tW - 8 - 9 * 2, 54, 2, v2, true);
 
   c.save(); clip(c, 22, 74, 418, 130); drawMarquee(c, marqueeText(), 22, 118, 396); c.restore();
-  c.drawImage(pixS.cv, 22, 140, 396, 45);
+  c.drawImage(pixS.cv, 21, 141, 396, 45);
   c.restore();
   vfdOverlay(c, 10, 25, 430, 213);
 
@@ -1465,7 +1596,7 @@ function winContent(now) {
 /* ---------- full-screen visualizer ---------- */
 function drawViz(c) {
   c.fillStyle = "#000"; c.fillRect(0, 0, LW, LH);
-  c.drawImage(pixF.cv, 0, 0, LW, LH);
+  c.drawImage(pixF.cv, 1, 0, 438, LH);
   if (o.vizinfo === 1) {
     vfdBox(c, 6, 6, 434, 28, 4);
     const t = Engine.track();
@@ -1474,11 +1605,72 @@ function drawViz(c) {
     c.restore();
     text(c, (Engine.playing() ? "▶ " : "❚❚ ") + fmtTime(Engine.pos()), 428, 22, 12, v2, {align: "right"});
   }
+  const pt = pattern(c, dotCv); if (pt.setTransform) pt.setTransform(new DOMMatrix().translate(1, 0));
+  c.fillStyle = pt; c.fillRect(0, 0, LW, LH); if (pt.setTransform) pt.setTransform(new DOMMatrix());
+  if (o.scanl === 1) { c.fillStyle = pattern(c, scanCv); c.fillRect(0, 0, LW, LH); }
 }
 
 /* ---------- boot animation (VFD test) ---------- */
+/* ---------- boot animations in the dot raster (kind 2 = pixel rain, 3 = hyperspace) ---------- */
+function seeded(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+class Boot {
+  constructor(kind) { this.kind = kind; const r = this.rng = seeded(7); this.logo = "P-HR-X1"; this.LS = 3;
+    this.lx = Math.trunc((146 - Font.width(this.logo, 3)) / 2); this.ly = 30; this.lastT = 0;
+    this.drops = []; let x = this.lx;
+    for (const ch of this.logo) { const g = Font.glyph(ch);
+      for (let k = 0; k < 7; k++) for (let j = 0; j < 5; j++) if (g[k][j]) for (let a = 0; a < 3; a++) for (let b = 0; b < 3; b++) {
+        const px = x + j * 3 + b, py = this.ly + k * 3 + a;
+        this.drops.push({x: px, y: py, y0: -2 - r() * 25, start: 900 + px * 5 + Math.trunc(r() * 520)}); }
+      x += Font.adv(ch) * 3; }
+    this.stars = Array.from({length: 130}, () => ({x: r() * 2 - 1, y: r() * 2 - 1, z: .05 + r() * .95})); }
+  draw(p, t, vc, v2, info, sub) {
+    p.clear(0);
+    if (this.kind === 3) this.hyper(p, t, vc, v2); else this.rain(p, t, vc, v2);
+    const tl = this.kind === 3 ? 2500 : 2300;
+    if (t > tl) { const n = Math.min(sub.length, Math.trunc((t - tl) / 35)); p.text(sub.slice(0, n), Math.trunc((146 - Font.width(sub)) / 2), this.kind === 3 ? 68 : 62, 1, v2); }
+    if (t > 2900) { p.text(info, Math.trunc((146 - Font.width(info)) / 2), this.kind === 3 ? 80 : 76, 1, vc, .75);
+      const cr = "VIBECODED WITH CLAUDE"; p.text(cr, Math.trunc((146 - Font.width(cr)) / 2), 98, 1, vc, .5); } }
+  rain(p, t, vc, v2) { const cy = 55;
+    if (t < 380) { const w = Math.trunc(t / 380 * 73); for (let x = 73 - w; x <= 73 + w; x++) { p.set(x, cy, v2); p.set(x, cy - 1, v2, .35); p.set(x, cy + 1, v2, .35); } }
+    if (t >= 300 && t <= 1150) { const ph = (t - 300) / 850;
+      for (let i = 0; i < 36; i++) { const hgt = Math.trunc(70 * Math.max(0, 1 - Math.abs(ph * 1.3 - .15 - i / 36) * 5));
+        for (let k = 0; k < hgt; k++) { if (k % 3 === 2) continue; for (let x = 0; x < 3; x++) p.set(4 + i * 4 + x, 92 - k, Col.mix(vc, v2, k / 70)); } } }
+    const glint = (t - 2350) * .16 - 20;
+    for (const d of this.drops) { const u = (t - d.start) / 420;
+      if (u <= 0) continue;
+      if (u < 1) { const y = d.y0 + (d.y - d.y0) * u * u; p.set(d.x, y, Col.mix(v2, Col.WHITE, .3)); for (let k = 1; k <= 3; k++) p.set(d.x, y - k * 2, v2, .5 - k * .13); }
+      else { const fresh = t - d.start - 420 < 90, gl = t > 2350 && Math.abs(d.x - d.y * .5 - glint) < 4 ? .55 : 0;
+        p.set(d.x, d.y, fresh ? Col.mix(v2, Col.WHITE, .4) : Col.mix(vc, Col.WHITE, gl)); } } }
+  hyper(p, t, vc, v2) {
+    const dt = Math.min(100, Math.max(0, t - this.lastT)) / 33; this.lastT = t;
+    const cx = 73, cy = 55, sp = t < 1500 ? .004 + (t / 1500) * (t / 1500) * .07 : .003, dim = t < 1500 ? 1 : .35;
+    for (const s of this.stars) {
+      const x0 = cx + s.x / s.z * 40, y0 = cy + s.y / s.z * 40; s.z -= sp * dt;
+      if (s.z <= .03) { s.x = this.rng() * 2 - 1; s.y = this.rng() * 2 - 1; s.z = 1; continue; }
+      p.line(x0, y0, cx + s.x / s.z * 40, cy + s.y / s.z * 40, Col.mix(vc, v2, Math.min(1, sp * 18)), dim * Math.min(1, 1.2 - s.z)); }
+    if (t >= 1500 && t <= 2050) { const r = t < 1750 ? (t - 1500) / 250 * 95 : 95, al = t < 1750 ? 1 : 1 - (t - 1750) / 300;
+      for (let y = 0; y < 110; y++) for (let x = 0; x < 146; x++) { const d = Math.hypot(x - cx, (y - cy) * 1.3); if (d < r) p.set(x, y, Col.mix(v2, Col.WHITE, .35 * (1 - d / 95)), al * (.35 + .65 * (1 - d / 95))); } }
+    if (t > 1750) {
+      const s = t < 2230 ? 3 + Math.trunc((2230 - t) / 80) : 3, w = Font.width(this.logo, s);
+      p.text(this.logo, Math.trunc((146 - w) / 2), this.ly + 10 - Math.trunc(7 * s / 2), s, vc);
+      if (t >= 2230) { const q = (t - 2230) / 500; if (q < 1) for (let an = 0; an < 2 * PI; an += .015) p.set(cx + Math.cos(an) * q * 90, this.ly + 10 + Math.sin(an) * q * 30, v2, 1 - q); } }
+    if (t > 2230) { const len = Math.min(126, (t - 2230) * .25); let px = 10, py = 59;
+      for (let x = 10; x <= 10 + len; x += 1) { const y = 59 + Math.sin(x * .35 + t * .012) * 2.5 * (1 - x / 146); if (x > 10) p.line(px, py, x, y, v2, .8); px = x; py = y; } } }
+}
+let boot = null, bootFor = 0;
+const pixB = new Pix(146, 110);
 function drawBoot(c, now) {
   const t = now - bootStart;
+  if (o.boot >= 2) {   // pixel rain / hyperspace: in the dot raster like the full-screen visualizer
+    if (bootFor !== bootStart || !boot) { boot = new Boot(o.boot); bootFor = bootStart; }
+    const info = `${Engine.folders.length} ` + L("ORDNER", "FOLDERS") + ` · ${Engine.folders.reduce((s, f) => s + f.tracks.length, 0)} ` + L("LIEDER", "TRACKS");
+    boot.draw(pixB, t, vc, v2, info, "HIGH RESOLUTION AUDIO"); pixB.flush();
+    c.fillStyle = "#000"; c.fillRect(0, 0, LW, LH); c.drawImage(pixB.cv, 1, 0, 438, LH);
+    const pt = pattern(c, dotCv); if (pt.setTransform) pt.setTransform(new DOMMatrix().translate(1, 0));
+    c.fillStyle = pt; c.fillRect(0, 0, LW, LH); if (pt.setTransform) pt.setTransform(new DOMMatrix());
+    if (o.scanl === 1) { c.fillStyle = pattern(c, scanCv); c.fillRect(0, 0, LW, LH); }
+    return;
+  }
   c.fillStyle = "#000"; c.fillRect(0, 0, LW, LH);
   vfdBox(c, 10, 10, 430, 320);
   if (t < 700) { text(c, "88:88 8888", 220, 150, 40, vc, {align: "center"}); text(c, "████████████████", 220, 180, 16, vc, {align: "center"});
@@ -1561,7 +1753,7 @@ function press(k, repeat) {
   else if (k === "up" || k === "down") { if (n > 0) { const i = (Engine.cur + (k === "up" ? 1 : -1) + n) % n; drum.set(i, n); Engine.playFolder(i); } }
   else if (k === "b") { mode = "term"; tcur = Engine.cur; }
   else if (k === "start") openOpt();
-  else if (k === "select") { mode = "viz"; toast("VISUALIZER: " + Viz.label(o.viz).toUpperCase()); }
+  else if (k === "select") { mode = "viz"; vizNameUntil = Date.now() + 1400; }
   else if (k === "l1" || k === "r1") nextViz(k === "r1" ? 1 : -1);
   else if (k === "x") { o.shuf = 1 - o.shuf; Engine.applyOpts(); }
   else if (k === "y") { o.rep = (o.rep + 1) % 3; Engine.applyOpts(); }
@@ -1579,7 +1771,8 @@ function holdSeek(k, repeat) {
 function release(k) {
   if ((k === "left" || k === "right") && pendStep === k) { if (!seeking && (mode === "player" || mode === "viz")) Engine.step(k === "left" ? -1 : 1); pendStep = null; seeking = false; }
 }
-function nextViz(d) { o.viz = (o.viz + d + VIZ_NAMES.length) % VIZ_NAMES.length; toast("VISUALIZER: " + Viz.label(o.viz).toUpperCase()); }
+function nextViz(d) { o.viz = (o.viz + d + VIZ_NAMES.length) % VIZ_NAMES.length;
+  if (mode === "viz") vizNameUntil = Date.now() + 1400; else toast("VISUALIZER: " + Viz.label(o.viz).toUpperCase()); }
 function openOpt() { mode = "opt"; lvl = "cat"; ocur = 0; optScroll = 0; }
 function closeOpt() {
   mode = "player";

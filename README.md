@@ -35,7 +35,7 @@ whole app is controlled with the D-pad and face buttons.
 | Full-screen visualizer (SELECT) | Boot animation |
 |---|---|
 | ![Night Drive](docs/screenshots/night-drive.png) | ![Boot](docs/screenshots/boot.png) |
-| Night Drive, one of 24 visualizers | VFD test on start |
+| Night Drive, one of 24 visualizers | VFD test on start (also: Pixel rain, Hyperspace) |
 
 All screenshots: color scheme Lavender / Red, brightness 100 %.
 
@@ -50,7 +50,14 @@ All screenshots: color scheme Lavender / Red, brightness 100 %.
 | Abstract | Dolphins · Plasma · Tunnel · Galaxy · Lava Lamp · Orbit · Cells · Kaleidoscope · DNA Helix · Pixel Rain · Polyhedron · Jellyfish |
 
 They read the PCM stream straight from the player (no microphone permission), react to the beat and get
-more intense with the volume, at full power from 50 %.
+more intense with the volume, at full power from 50 %. Every pixel sits on the dot raster of the VFD display.
+When the music stops they settle into a calm idle motion. Some of them in detail:
+
+- **Dolphins**: each dolphin follows its own frequency band, which also sets its depth (bass in front and big,
+  highs far back and small); a dolphin jumps when its band kicks in and swims on afterwards, more energy brings more dolphins
+- **Orbit**: more moons with more energy, each on its own band; the ring is a round spectrum, a shock wave runs on every beat
+- **Polyhedron**: cube, octahedron and tetrahedron nested in each other, pulsing on bass, mids and highs; the inner ones shrink in silence
+- **Night Drive**: the road speed follows the music, the double curb pulses between the two colors
 
 **On top of that:**
 

@@ -104,7 +104,7 @@ object Menu {
                 Item("mspeed", "Laufschrift-Tempo", "Marquee speed", T.ROLL, valDe = listOf("Langsam", "Normal", "Schnell"), valEn = listOf("Slow", "Normal", "Fast")),
                 Item("drum", "Walze", "Drum", T.ROLL, valDe = listOf("Federnd", "Weich", "Mechanisch", "Sofort"), valEn = listOf("Springy", "Smooth", "Mechanical", "Instant")),
                 Item("trans", "Fensterübergang", "Window transition", T.ROLL, valDe = listOf("Schieben", "Blende", "Scanline"), valEn = listOf("Slide", "Fade", "Scanline")),
-                Item("boot", "Startanimation", "Boot animation", T.ROLL, valDe = listOf("VFD-Test", "Aus"), valEn = listOf("VFD test", "Off")),
+                Item("boot", "Startanimation", "Boot animation", T.ROLL, valDe = listOf("VFD-Test", "Aus", "Pixel-Regen", "Hyperraum"), valEn = listOf("VFD test", "Off", "Pixel rain", "Hyperspace")),
                 Item("bootnow", "Startanimation zeigen", "Show boot animation", T.ACT, action = "boot"))),
             Cat("System", "System", "⚙", listOf(
                 Item("lang", "Sprache / Language", "Language / Sprache", T.ROLL, valDe = listOf("English", "Deutsch")),

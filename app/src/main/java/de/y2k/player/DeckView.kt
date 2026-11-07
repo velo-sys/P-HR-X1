@@ -60,7 +60,7 @@ class DeckView(ctx: Context) : View(ctx), Choreographer.FrameCallback {
     // Pixel-Grafik
     private val drum = Drum()
     private val audio = Audio()
-    private val pixS = Pix(132, 15); private val pixF = Pix(147, 110)
+    private val pixS = Pix(132, 15); private val pixF = Pix(146, 110)   // 146×110 × 3 logische px = genau das VFD-Punktraster
     private var vizS: Vis? = null; private var vizSi = -1
     private var vizF: Vis? = null; private var vizFi = -1
     private val vcx = VC()
@@ -111,18 +111,36 @@ class DeckView(ctx: Context) : View(ctx), Choreographer.FrameCallback {
         for (i in 0 until 32) va.b[i] = audio.b[i] * inten
         for (j in 0 until 128) va.w[j] = audio.w[j] * inten
         va.L = audio.L * inten; va.R = audio.R * inten; va.kick = audio.kick * inten; va.beatN = audio.beatN
+        // Aktivität: steigt schnell mit der Musik, klingt nach dem Stopp in ~1,5 s auf 0 ab
+        var en = 0f; for (i in 0 until 32) en += va.b[i]
+        val actT = clamp01(en / 32f * 2.2f); vcx.act += (actT - vcx.act) * (if (actT > vcx.act) .25f else .07f)
+        if (vcx.act < .003f) vcx.act = 0f
         drum.mode = o["drum"]; drum.step()
         if (!drumSynced && n > 0) { drum.jump(Engine.cur); drumSynced = true }
         if (vizSi != o["viz"]) { vizSi = o["viz"]; vizS = Viz.create(vizSi) }   // klein und groß immer synchron
         if (vizFi != o["viz"]) { vizFi = o["viz"]; vizF = Viz.create(vizFi) }
         fillVc(true)
-        if (mode == "viz" || vizP > 0.01f || (mode == "opt" && curItem()?.k == "viz")) { vcx.bg = 0; vcx.small = false; vizF?.draw(pixF, va, vcx); pixF.flush() }
+        if (mode == "viz" || vizP > 0.01f || (mode == "opt" && curItem()?.k == "viz")) { vcx.bg = 0; vcx.small = false; vizF?.draw(pixF, va, vcx); vizNameFlush(now) }
         if (mode != "viz") { vcx.bg = 0x05080A; vcx.small = true; vizS?.draw(pixS, va, vcx); pixS.flush() }
         // Bildschirm an halten
         val keep = intArrayOf(0, 30_000, 60_000, 300_000)[o["off"].coerceIn(0, 3)]
         (context as? MainActivity)?.keepScreenOn(keep == 0 || now - lastInput < keep)
     }
     private var drumSynced = false
+
+    /** Visualizer-Name im Vollbild: 5×7-Pixelschrift in der Zweitfarbe, schwarzer Rand drumherum, direkt im Punktraster. */
+    private var vizNameUntil = 0L
+    private val vizNameSave by lazy { IntArray(pixF.px.size) }
+    private fun vizNameFlush(now: Long) {
+        if (mode != "viz" || now >= vizNameUntil) { pixF.flush(); return }
+        val s = Viz.label(o["viz"]).uppercase(); val w = Font.width(s) + 6; val h = 7 + 6
+        val x0 = (pixF.w - w) / 2; val y0 = if (o["vizinfo"] == 1) 11 else 4
+        System.arraycopy(pixF.px, 0, vizNameSave, 0, pixF.px.size)
+        for (y in y0 until y0 + h) for (x in x0 until x0 + w) pixF.set(x, y, 0)
+        pixF.text(s, x0 + 3, y0 + 3, 1, vcx.v2)
+        pixF.flush()
+        System.arraycopy(vizNameSave, 0, pixF.px, 0, pixF.px.size)   // Nachleucht-Visualizer sollen den Kasten nicht mitschleppen
+    }
     private val va = Audio(); private var volFrac = 1f; private var volT = 0L
 
     private fun fillVc(forViz: Boolean) {
@@ -279,7 +297,7 @@ class DeckView(ctx: Context) : View(ctx), Choreographer.FrameCallback {
         drawMarquee(c, marqueeText(), 22f, 118f, 396f)
         c.restore()
         // kleiner Visualizer
-        r.set(22f, 140f, 418f, 185f); c.drawBitmap(pixS.bmp, null, r, bp)
+        r.set(21f, 141f, 417f, 186f); c.drawBitmap(pixS.bmp, null, r, bp)   // auf das 3-px-Punktraster ausgerichtet
         c.restore()
         vfdOverlay(c, 10f, 25f, 430f, 213f)
 
@@ -594,7 +612,8 @@ class DeckView(ctx: Context) : View(ctx), Choreographer.FrameCallback {
     // ---------- Vollbild-Visualizer ----------
     private fun drawViz(c: Canvas) {
         fp.color = 0xFF000000.toInt(); c.drawRect(0f, 0f, LW, LH, fp)
-        r.set(0f, 0f, LW, LH); c.drawBitmap(pixF.bmp, null, r, bp)
+        // jedes Visualizer-Pixel = genau ein Punkt des VFD-Rasters (3 logische px), 1 px Rand links/rechts
+        r.set(1f, 0f, 439f, LH); c.drawBitmap(pixF.bmp, null, r, bp)
         if (o["vizinfo"] == 1) {
             vfdBox(c, 6f, 6f, 434f, 28f, 4f)
             val t = Engine.track()
@@ -603,11 +622,31 @@ class DeckView(ctx: Context) : View(ctx), Choreographer.FrameCallback {
             c.restore()
             text(c, (if (Engine.playing()) "▶ " else "❚❚ ") + fmtTime(Engine.pos()), 428f, 22f, 12f, v2, align = Paint.Align.RIGHT)
         }
+        // VFD-Punktraster über das ganze Bild, exakt auf die Visualizer-Pixel gelegt
+        dotMatrix.setTranslate(1f, 0f); dotPaint.shader.setLocalMatrix(dotMatrix); dotPaint.alpha = 255
+        c.drawRect(0f, 0f, LW, LH, dotPaint)
+        dotMatrix.reset(); dotPaint.shader.setLocalMatrix(dotMatrix)
+        if (o["scanl"] == 1) c.drawRect(0f, 0f, LW, LH, scanPaint)
     }
 
     // ---------- Startanimation (VFD-Test) ----------
+    private val pixB by lazy { Pix(146, 110) }
+    private var boot: Boot? = null; private var bootFor = 0L
     private fun drawBoot(c: Canvas, now: Long) {
         val t = now - bootStart
+        val kind = o["boot"]
+        if (kind >= 2) {   // Pixel-Regen / Hyperraum: im Punktraster wie der Vollbild-Visualizer
+            if (bootFor != bootStart || boot == null) { boot = Boot(kind); bootFor = bootStart }
+            val info = "${Engine.folders.size} " + L("ORDNER", "FOLDERS") + " · ${Engine.folders.sumOf { it.tracks.size }} " + L("LIEDER", "TRACKS")
+            boot?.draw(pixB, t, vc, v2, info, "HIGH RESOLUTION AUDIO"); pixB.flush()
+            fp.color = 0xFF000000.toInt(); c.drawRect(0f, 0f, LW, LH, fp)
+            r.set(1f, 0f, 439f, LH); c.drawBitmap(pixB.bmp, null, r, bp)
+            dotMatrix.setTranslate(1f, 0f); dotPaint.shader.setLocalMatrix(dotMatrix); dotPaint.alpha = 255
+            c.drawRect(0f, 0f, LW, LH, dotPaint)
+            dotMatrix.reset(); dotPaint.shader.setLocalMatrix(dotMatrix)
+            if (o["scanl"] == 1) c.drawRect(0f, 0f, LW, LH, scanPaint)
+            return
+        }
         fp.color = 0xFF000000.toInt(); c.drawRect(0f, 0f, LW, LH, fp)
         vfdBox(c, 10f, 10f, 430f, 320f)
         val l1 = BRAND
@@ -711,7 +750,7 @@ class DeckView(ctx: Context) : View(ctx), Choreographer.FrameCallback {
             "up", "down" -> if (n > 0) { val i = (Engine.cur + (if (k == "up") 1 else -1) + n) % n; drum.set(i, n); Engine.playFolder(i) }
             "b" -> { mode = "term"; tcur = Engine.cur }
             "start" -> openOpt()
-            "select" -> { mode = "viz"; toast("VISUALIZER: " + Viz.label(o["viz"]).uppercase()) }
+            "select" -> { mode = "viz"; vizNameUntil = System.currentTimeMillis() + 1400 }
             "l1", "r1" -> nextViz(if (k == "r1") 1 else -1)
             "x" -> { o["shuf"] = 1 - o["shuf"]; Engine.applyOpts() }
             "y" -> { o["rep"] = (o["rep"] + 1) % 3; Engine.applyOpts() }
@@ -735,7 +774,8 @@ class DeckView(ctx: Context) : View(ctx), Choreographer.FrameCallback {
 
     private fun nextViz(d: Int) {
         o["viz"] = (o["viz"] + d + Viz.NAMES.size) % Viz.NAMES.size
-        toast("VISUALIZER: " + Viz.label(o["viz"]).uppercase())
+        if (mode == "viz") vizNameUntil = System.currentTimeMillis() + 1400   // Name im Pixelraster statt Extra-Fenster
+        else toast("VISUALIZER: " + Viz.label(o["viz"]).uppercase())
     }
 
     private fun openOpt() { mode = "opt"; lvl = "cat"; ocur = 0; optScroll = 0f }
